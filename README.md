@@ -1,3 +1,7 @@
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/wafflestudio/waffle-judge)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/wafflestudio/waffle-judge/ci.yml?branch=main)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/wafflestudio/waffle-judge)
+
 # waffle-judge
 
 와플스튜디오에서 제작한 채점서버입니다.
