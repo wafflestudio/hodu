@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build & Run Server
+        run: |
+          cargo build
+          ./target/debug/waffle-judge &
+      - name: Install Test Cli
+        run: |
+          npm install -g @usebruno/cli
+      - name: Run Tests
+        working-directory: tests/bruno
+        run: |
+          bru run
