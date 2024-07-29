@@ -2,8 +2,7 @@ use actix_web::{post, web, App, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 mod languages;
 use languages::{c::run_c_code, java::run_java_code};
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 enum Language {
@@ -26,11 +25,7 @@ pub struct ExecutionResult {
 
 #[post("/submit")]
 async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
-    let random_string: String = thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(30)
-        .map(char::from)
-        .collect();
+    let random_string: String = Uuid::new_v4().to_string();
     let temp_dir = format!("./.temp/{}", random_string);
     let temp_dir = std::path::Path::new(&temp_dir);
     std::fs::create_dir_all(temp_dir).unwrap();
