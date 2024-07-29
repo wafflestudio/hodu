@@ -9,9 +9,9 @@
 
 ## 구조
 
-- `src/main.rs`가 진입점이며 서버를 띄우는 역할을 합니다.
+- `waffle-judge-server/src/main.rs`가 진입점이며 서버를 띄우는 역할을 합니다.
   - 서버를 띄울 때에는 `actix-web`을 이용하며, 직렬화를 위해 `serde`를 사용합니다.
-- `src/languages/` 에는 각 언어별 실행함수가 들어있습니다.
+- `waffle-judge-core/src/languages/` 에는 각 언어별 실행함수가 들어있습니다.
 - 실행하려면 임시로 파일을 저장해둘 경로가 필요한데, `.temp` 경로가 해당 역할을 합니다.
 - API 콜 테스트 및 자동화 테스트에는 Bruno 를 활용합니다. Bruno Collection 은 [여기](./tests/bruno) 에 있습니다.
 
