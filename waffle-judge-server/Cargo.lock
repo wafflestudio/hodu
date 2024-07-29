@@ -1134,12 +1134,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
-name = "waffle-judge"
+name = "waffle-judge-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "waffle-judge-server"
 version = "0.1.0"
 dependencies = [
  "actix-web",
  "serde",
  "serde_json",
+ "waffle-judge-core",
 ]
 
 [[package]]

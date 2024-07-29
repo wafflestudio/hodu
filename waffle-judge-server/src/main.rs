@@ -1,25 +1,13 @@
 use actix_web::{post, web, App, HttpServer, Responder};
-use serde::{Deserialize, Serialize};
-mod languages;
-use languages::{c::run_c_code, java::run_java_code};
+use serde::Deserialize;
 
-#[derive(Deserialize)]
-enum Language {
-    C,
-    JAVA,
-}
+extern crate waffle_judge_core;
+use waffle_judge_core::{run_c_code, run_java_code, Language};
 
 #[derive(Deserialize)]
 struct CodeSubmission {
     language: Language,
     code: String,
-}
-
-#[derive(Serialize)]
-pub struct ExecutionResult {
-    stdout: String,
-    stderr: String,
-    success: bool,
 }
 
 #[post("/submit")]

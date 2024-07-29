@@ -1,5 +1,6 @@
-use crate::ExecutionResult;
 use std::process::Command;
+
+use super::ExecutionResult;
 
 pub fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
     let temp_java_file = temp_dir.join("Main.java");
