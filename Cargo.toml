@@ -1,0 +1,3 @@
+[workspace]
+members = ["waffle-judge-*"]
+resolver = "2"
