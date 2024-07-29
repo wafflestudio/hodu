@@ -17,11 +17,11 @@ jobs:
       - name: Build & Run Server
         run: |
           cargo build
-          ./target/debug/waffle-judge &
+          ./target/debug/waffle-judge-server &
       - name: Install Test Cli
         run: |
           npm install -g @usebruno/cli
       - name: Run Tests
-        working-directory: tests/bruno
+        working-directory: waffle-judge-server/tests/bruno
         run: |
           bru run
