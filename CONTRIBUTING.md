@@ -8,6 +8,10 @@
 curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 ```
 
+### Install Docker
+
+운영체제에 맞게 설치해 주세요.
+
 ### Install Bruno & bruno cli
 
 - Bruno 는 [여기](https://www.usebruno.com/downloads) 서 가이드에 따라 설치합니다.
@@ -18,8 +22,18 @@ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 
 ## Run
 
-- `cargo run`
-- 또는 `cargo build` 후 `./target/debug/waffle-judge`
+로컬에 isolate 가 설치되어 있다면 아래와 같이 실행할 수 있습니다.
+
+```sh
+cargo run
+```
+
+로컬에 isolate 가 설치되어 있다면 아래와 같이 Docker 를 활용할 수밖에 없습니다.
+
+```sh
+docker build -t waffle-judge .
+docker run -dp 8080:8080 waffle-judge
+```
 
 ## Test
 
