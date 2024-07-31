@@ -17,6 +17,10 @@
   - 실행이 끝나면 임시 폴더가 제거됩니다.
 - API 콜 테스트 및 자동화 테스트에는 Bruno 를 활용합니다. Bruno Collection 은 [여기](./tests/bruno) 에 있습니다.
 
+## 배포
+
+- `Docker` 를 활용하며, debian 12.6 이미지로 빌드됩니다.
+
 ## CI/CD
 
 - CI는 Github Actions 를 사용합니다. [여기](./.github/workflows/ci.yml) 을 참고해 주세요.

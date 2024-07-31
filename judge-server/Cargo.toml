@@ -1,10 +1,10 @@
 [package]
-name = "waffle-judge-server"
+name = "judge-server"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-waffle-judge-core = { path = "../waffle-judge-core" }
+judge-core = { path = "../judge-core" }
 actix-web = "4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

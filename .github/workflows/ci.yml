@@ -16,12 +16,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build & Run Server
         run: |
-          cargo build
-          ./target/debug/waffle-judge-server &
+          docker build -t waffle-judge .
+          docker run -d -p 8080:8080 waffle-judge
       - name: Install Test Cli
         run: |
           npm install -g @usebruno/cli
       - name: Run Tests
-        working-directory: waffle-judge-server/tests/bruno
+        working-directory: judge-server/tests/bruno
         run: |
           bru run
