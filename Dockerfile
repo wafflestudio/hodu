@@ -41,4 +41,4 @@ COPY --from=isolate-builder /usr/src/isolate/isolate /usr/local/bin/isolate
 COPY --from=isolate-builder /usr/src/isolate/isolate-check-environment /usr/local/bin/isolate-check-environment
 COPY --from=isolate-builder /usr/src/isolate/default.cf /usr/local/etc/isolate
 
-ENTRYPOINT ["/usr/local/bin/waffle-judge"]
+ENTRYPOINT ["/usr/local/bin/judge-server"]

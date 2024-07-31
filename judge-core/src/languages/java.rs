@@ -2,7 +2,7 @@ use std::process::Command;
 
 use super::ExecutionResult;
 
-pub fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
+pub fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
     let source_path = temp_dir.join("Main.java");
 
     std::fs::write(&source_path, code).expect("Unable to write file");

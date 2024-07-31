@@ -4,7 +4,7 @@ use std::process::Command;
 
 use super::ExecutionResult;
 
-pub fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
+pub fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
     let source_path = temp_dir.join("example.c");
     let binary_path = temp_dir.join("example");
     let box_id = rand::thread_rng().gen_range(0..1000);
