@@ -4,19 +4,17 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'Dockerfile'
-      - 'Cargo.*'
+    paths-ignore:
+      - '**/*.md'
+      - '.*/**/*.md'
+      - 'CODEOWNERS'
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'Dockerfile'
-      - 'Cargo.*'
+    paths-ignore:
+      - '**/*.md'
+      - '.*/**/*.md'
+      - 'CODEOWNERS'
 
 jobs:
   test:
