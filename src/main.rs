@@ -1,4 +1,4 @@
-use actix_web::{post, web, App, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 mod languages;
 use languages::{c::run_c_code, java::run_java_code};
@@ -23,6 +23,11 @@ pub struct ExecutionResult {
     success: bool,
 }
 
+#[get("/ping")]
+async fn ping() -> impl Responder {
+    "pong"
+}
+
 #[post("/submit")]
 async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
     let random_string: String = Uuid::new_v4().to_string();
@@ -42,8 +47,9 @@ async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(submit_code))
-        .bind("127.0.0.1:8080")?
+    std::fs::create_dir_all("./.temp").unwrap();
+    HttpServer::new(|| App::new().service(ping).service(submit_code))
+        .bind("0.0.0.0:8080")?
         .run()
         .await
 }
