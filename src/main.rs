@@ -36,8 +36,8 @@ async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
     std::fs::create_dir_all(temp_dir).unwrap();
 
     let output = match submission.language {
-        Language::C => run_c_code(&submission.code, temp_dir),
-        Language::JAVA => run_java_code(&submission.code, temp_dir),
+        Language::C => run_c_code(&submission.code, temp_dir).await,
+        Language::JAVA => run_java_code(&submission.code, temp_dir).await,
     };
 
     std::fs::remove_dir_all(temp_dir).unwrap();

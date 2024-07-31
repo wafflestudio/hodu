@@ -1,7 +1,7 @@
 use crate::ExecutionResult;
-use std::process::Command;
+use tokio::process::Command;
 
-pub fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
+pub async fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
     let temp_java_file = temp_dir.join("Main.java");
 
     std::fs::write(&temp_java_file, code).expect("Unable to write file");
@@ -9,6 +9,7 @@ pub fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult 
     let compile_output = Command::new("javac")
         .arg(&temp_java_file)
         .output()
+        .await
         .expect("Failed to compile Java code");
 
     if !compile_output.status.success() {
@@ -24,6 +25,7 @@ pub fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult 
         .arg(temp_dir)
         .arg("Main")
         .output()
+        .await
         .expect("Failed to execute Java code");
 
     if !output.status.success() {

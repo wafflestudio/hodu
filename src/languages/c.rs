@@ -1,7 +1,7 @@
 use crate::ExecutionResult;
-use std::process::Command;
+use tokio::process::Command;
 
-pub fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
+pub async fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
     let temp_c_dir = temp_dir.join("example.c");
     let temp_exec_dir = temp_dir.join("example");
 
@@ -12,6 +12,7 @@ pub fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
         .arg("-o")
         .arg(&temp_exec_dir)
         .output()
+        .await
         .expect("Failed to compile C code");
 
     if !compile_output.status.success() {
@@ -24,6 +25,7 @@ pub fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
 
     let output = Command::new(&temp_exec_dir)
         .output()
+        .await
         .expect("Failed to execute C code");
 
     if !output.status.success() {
