@@ -23,7 +23,11 @@ pub fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
         };
     }
 
-    let output = Command::new(&temp_exec_dir)
+    let output = Command::new("isolate")
+        .arg(format!("--dir={}", temp_dir.display()))
+        .arg("--run")
+        .arg("--")
+        .arg(&temp_exec_dir)
         .output()
         .expect("Failed to execute C code");
 
