@@ -1,26 +1,14 @@
 use actix_web::{get, post, web, App, HttpServer, Responder};
-use serde::{Deserialize, Serialize};
-mod languages;
-use languages::{c::run_c_code, java::run_java_code};
+use serde::Deserialize;
 use uuid::Uuid;
 
-#[derive(Deserialize)]
-enum Language {
-    C,
-    JAVA,
-}
+extern crate judge_core;
+use judge_core::{run_c_code, run_java_code, Language};
 
 #[derive(Deserialize)]
 struct CodeSubmission {
     language: Language,
     code: String,
-}
-
-#[derive(Serialize)]
-pub struct ExecutionResult {
-    stdout: String,
-    stderr: String,
-    success: bool,
 }
 
 #[get("/ping")]

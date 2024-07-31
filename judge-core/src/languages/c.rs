@@ -1,5 +1,6 @@
-use crate::ExecutionResult;
 use std::process::Command;
+
+use super::ExecutionResult;
 
 pub fn run_c_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
     let temp_c_dir = temp_dir.join("example.c");

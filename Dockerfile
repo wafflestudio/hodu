@@ -36,14 +36,14 @@ RUN apt-get update && apt-get --no-install-recommends install -y \
   && apt-get clean
 
 # copy bin
-COPY --from=waffle-judge-builder /usr/src/waffle-judge/target/release/waffle-judge /usr/local/bin/waffle-judge
+COPY --from=waffle-judge-builder /usr/src/waffle-judge/target/release/judge-server /usr/local/bin/judge-server
 COPY --from=isolate-builder /usr/src/isolate/isolate /usr/local/bin/isolate
 COPY --from=isolate-builder /usr/src/isolate/isolate-check-environment /usr/local/bin/isolate-check-environment
 COPY --from=isolate-builder /usr/src/isolate/default.cf /usr/local/etc/isolate
 
 RUN echo '#!/bin/sh' > /usr/local/bin/start.sh \
   && echo 'isolate --init' >> /usr/local/bin/start.sh \
-  && echo '/usr/local/bin/waffle-judge' >> /usr/local/bin/start.sh \
+  && echo '/usr/local/bin/judge-server' >> /usr/local/bin/start.sh \
   && chmod +x /usr/local/bin/start.sh
 
 ENTRYPOINT ["/usr/local/bin/start.sh"]
