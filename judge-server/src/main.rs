@@ -4,8 +4,7 @@ use uuid::Uuid;
 
 extern crate judge_core;
 use judge_core::{
-    languages::{cpp::run_cpp_code, javascript::run_javascript_code, python::run_python_code},
-    run_c_code, run_java_code, Language,
+    run_c_code, run_cpp_code, run_java_code, run_javascript_code, run_python_code, Language,
 };
 
 #[derive(Deserialize)]
@@ -31,7 +30,7 @@ async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
         Language::JAVASCRIPT => run_javascript_code(&submission.code, &temp_dir).await,
     };
 
-    // std::fs::remove_dir_all(temp_dir).unwrap();
+    std::fs::remove_dir_all(temp_dir).unwrap();
 
     web::Json(output)
 }

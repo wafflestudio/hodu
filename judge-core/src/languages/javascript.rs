@@ -1,4 +1,4 @@
-use std::process::Command;
+use tokio::process::Command;
 
 use super::ExecutionResult;
 
@@ -11,6 +11,7 @@ pub async fn run_javascript_code(code: &str, temp_dir: &std::path::PathBuf) -> E
     let output = Command::new("node")
         .arg(&source_path)
         .output()
+        .await
         .expect("Failed to execute JavaScript code");
 
     if !output.status.success() {
