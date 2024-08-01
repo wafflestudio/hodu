@@ -2,13 +2,13 @@ use std::process::Command;
 
 use super::ExecutionResult;
 
-pub fn run_java_code(code: &str, temp_dir: &std::path::Path) -> ExecutionResult {
-    let temp_java_file = temp_dir.join("Main.java");
+pub fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
+    let source_path = temp_dir.join("Main.java");
 
-    std::fs::write(&temp_java_file, code).expect("Unable to write file");
+    std::fs::write(&source_path, code).expect("Unable to write file");
 
     let compile_output = Command::new("javac")
-        .arg(&temp_java_file)
+        .arg(&source_path)
         .output()
         .expect("Failed to compile Java code");
 

@@ -32,7 +32,7 @@ cargo run
 
 ```sh
 docker build -t waffle-judge .
-docker run -dp 8080:8080 waffle-judge
+docker run --privileged -dp 8080:8080 waffle-judge
 ```
 
 ## Test

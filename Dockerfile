@@ -1,7 +1,7 @@
 #
 # build waffle-judge
 #
-FROM rust:1.80.0-slim as waffle-judge-builder
+FROM rust:1.80.0-slim AS waffle-judge-builder
 
 WORKDIR /usr/src/waffle-judge
 COPY . .
@@ -10,7 +10,7 @@ RUN cargo build --release
 #
 # build isolate
 #
-FROM debian:12.6-slim as isolate-builder
+FROM debian:12.6-slim AS isolate-builder
 
 # install isolate
 RUN apt-get update && apt-get --no-install-recommends install -y \
@@ -23,7 +23,7 @@ RUN make isolate
 #
 # runner
 #
-FROM debian:12.6-slim as runner
+FROM debian:12.6-slim AS runner
 
 # install language specific tools
 RUN apt-get update && apt-get --no-install-recommends install -y \
@@ -41,9 +41,4 @@ COPY --from=isolate-builder /usr/src/isolate/isolate /usr/local/bin/isolate
 COPY --from=isolate-builder /usr/src/isolate/isolate-check-environment /usr/local/bin/isolate-check-environment
 COPY --from=isolate-builder /usr/src/isolate/default.cf /usr/local/etc/isolate
 
-RUN echo '#!/bin/sh' > /usr/local/bin/start.sh \
-  && echo 'isolate --init' >> /usr/local/bin/start.sh \
-  && echo '/usr/local/bin/judge-server' >> /usr/local/bin/start.sh \
-  && chmod +x /usr/local/bin/start.sh
-
-ENTRYPOINT ["/usr/local/bin/start.sh"]
+ENTRYPOINT ["/usr/local/bin/judge-server"]
