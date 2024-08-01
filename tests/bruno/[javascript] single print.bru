@@ -1,7 +1,7 @@
 meta {
-  name: [c] no semicolon
+  name: [javascript] single print
   type: http
-  seq: 2
+  seq: 4
 }
 
 post {
@@ -16,11 +16,11 @@ headers {
 
 body:json {
   {
-    "language": "C",
-    "code": "#include <stdio.h>\nint main() { printf(\"Hello World\") }"
+    "language": "JAVASCRIPT",
+    "code": "console.log('Hello');"
   }
 }
 
 assert {
-  res.body.stdout: eq ""
+  res.body.stdout: eq Hello\n
 }

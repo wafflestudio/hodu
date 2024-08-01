@@ -1,0 +1,26 @@
+meta {
+  name: [c] stars
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://127.0.0.1:8080/submit
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "language": "C",
+    "code": "#include <stdio.h>\nint main() { for (int i = 0; i < 5; i++) { for (int j = 0; j <= i; j++) {printf(\"*\");}\n printf(\"\\n\");}\n return 0;\n}"
+  }
+}
+
+assert {
+  res.body.stdout: eq *\n**\n***\n****\n*****\n
+}

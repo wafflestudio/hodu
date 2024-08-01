@@ -3,7 +3,10 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 extern crate judge_core;
-use judge_core::{run_c_code, run_java_code, Language};
+use judge_core::{
+    languages::{cpp::run_cpp_code, javascript::run_javascript_code, python::run_python_code},
+    run_c_code, run_java_code, Language,
+};
 
 #[derive(Deserialize)]
 struct CodeSubmission {
@@ -22,10 +25,13 @@ async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
 
     let output = match submission.language {
         Language::C => run_c_code(&submission.code, &temp_dir).await,
+        Language::CPP => run_cpp_code(&submission.code, &temp_dir).await,
         Language::JAVA => run_java_code(&submission.code, &temp_dir).await,
+        Language::PYTHON => run_python_code(&submission.code, &temp_dir).await,
+        Language::JAVASCRIPT => run_javascript_code(&submission.code, &temp_dir).await,
     };
 
-    std::fs::remove_dir_all(temp_dir).unwrap();
+    // std::fs::remove_dir_all(temp_dir).unwrap();
 
     web::Json(output)
 }
