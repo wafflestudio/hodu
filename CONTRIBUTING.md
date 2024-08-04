@@ -31,8 +31,8 @@ cargo run
 로컬에 isolate 가 설치되어 있다면 아래와 같이 Docker 를 활용할 수밖에 없습니다.
 
 ```sh
-docker build -t waffle-judge .
-docker run --privileged -dp 8080:8080 waffle-judge
+docker build -t hodu .
+docker run --privileged -dp 8080:8080 hodu
 ```
 
 ## Test
