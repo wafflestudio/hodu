@@ -1,10 +1,10 @@
 use rand::Rng;
 
-use std::process::Command;
+use tokio::process::Command;
 
 use super::ExecutionResult;
 
-pub fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
+pub async fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
     let source_path = temp_dir.join("example.c");
     let binary_path = temp_dir.join("example");
     let box_id = rand::thread_rng().gen_range(0..1000);
@@ -16,6 +16,7 @@ pub fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult 
         .arg("-o")
         .arg(&binary_path)
         .output()
+        .await
         .expect("Failed to compile C code");
 
     if !compile_output.status.success() {
@@ -31,6 +32,7 @@ pub fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult 
         .arg(&box_id_arg)
         .arg("--init")
         .output()
+        .await
         .expect("Failed to init box");
     let output = Command::new("isolate")
         .arg(format!("--dir={}", temp_dir.display()))
@@ -39,11 +41,13 @@ pub fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult 
         .arg("--")
         .arg(&binary_path)
         .output()
+        .await
         .expect("Failed to execute C code");
     Command::new("isolate")
         .arg(&box_id_arg)
         .arg("--cleanup")
         .output()
+        .await
         .expect("Failed to cleanup box");
 
     if !output.status.success() {

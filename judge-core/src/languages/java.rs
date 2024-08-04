@@ -1,8 +1,8 @@
-use std::process::Command;
+use tokio::process::Command;
 
 use super::ExecutionResult;
 
-pub fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
+pub async fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
     let source_path = temp_dir.join("Main.java");
 
     std::fs::write(&source_path, code).expect("Unable to write file");
@@ -10,6 +10,7 @@ pub fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResu
     let compile_output = Command::new("javac")
         .arg(&source_path)
         .output()
+        .await
         .expect("Failed to compile Java code");
 
     if !compile_output.status.success() {
@@ -25,6 +26,7 @@ pub fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResu
         .arg(temp_dir)
         .arg("Main")
         .output()
+        .await
         .expect("Failed to execute Java code");
 
     if !output.status.success() {

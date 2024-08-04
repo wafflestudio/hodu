@@ -4,7 +4,7 @@
 
 - 실행 시 `http://127.0.0.1:8080` 에 서버를 띄웁니다.
 - `POST /submit` 경로에 `{ language: String, code: String }` 형태의 JSON 데이터를 받습니다.
-- 받은 데이터를 language 에 따라 컴파일하고 실행합니다.
+- 받은 데이터를 language 에 따라 비동기적으로 컴파일하고 실행합니다.
 - 실행 결과를 JSON 형태로 반환합니다.
 
 ## 구조
