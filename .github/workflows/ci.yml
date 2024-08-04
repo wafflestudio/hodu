@@ -17,11 +17,11 @@ jobs:
       - name: Build & Run Server
         run: |
           docker build -t waffle-judge .
-          docker run -d -p 8080:8080 waffle-judge
+          docker run --privileged -dp 8080:8080 waffle-judge
       - name: Install Test Cli
         run: |
           npm install -g @usebruno/cli
       - name: Run Tests
-        working-directory: tests/bruno
+        working-directory: judge-server/tests/bruno
         run: |
           bru run
