@@ -1,5 +1,5 @@
 meta {
-  name: [C] run shell - rm
+  name: [c] run shell - ls
   type: http
   seq: 2
 }
@@ -17,7 +17,7 @@ headers {
 body:json {
   {
     "language": "C",
-    "code": "#include <stdlib.h>\n#include <stdio.h>\nint main() { int result = system(\"touch /tmp/isolate_test\"); printf(\"%d\", result); }"
+    "code": "#include <stdlib.h>\nint main() { int result = system(\"ls -a\"); printf(\"%d\", result); }"
   }
 }
 

@@ -1,21 +1,22 @@
 use tokio::process::Command;
 
-use super::ExecutionResult;
 use crate::sandbox::isolate::execute_isolate;
 
-pub async fn run_c_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
-    let source_path = temp_dir.join("example.c");
+use super::ExecutionResult;
+
+pub async fn run_cpp_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
+    let source_path = temp_dir.join("example.cpp");
     let binary_path = temp_dir.join("example");
 
     std::fs::write(&source_path, code).expect("Unable to write file");
 
-    let compile_output = Command::new("gcc")
+    let compile_output = Command::new("g++")
         .arg(&source_path)
         .arg("-o")
         .arg(&binary_path)
         .output()
         .await
-        .expect("Failed to compile C code");
+        .expect("Failed to compile C++ code");
 
     if !compile_output.status.success() {
         return ExecutionResult {

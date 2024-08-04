@@ -3,16 +3,16 @@ use tokio::process::Command;
 use super::ExecutionResult;
 
 // TODO: isolate
-pub async fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
-    let source_path = temp_dir.join("Main.java");
+pub async fn run_javascript_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
+    let source_path = temp_dir.join("main.js");
 
     std::fs::write(&source_path, code).expect("Unable to write file");
 
-    let output = Command::new("java")
+    let output = Command::new("node")
         .arg(&source_path)
         .output()
         .await
-        .expect("Failed to execute Java code");
+        .expect("Failed to execute JavaScript code");
 
     if !output.status.success() {
         return ExecutionResult {

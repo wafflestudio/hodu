@@ -1,18 +1,17 @@
-use tokio::process::Command;
+use crate::sandbox::isolate::execute_isolate;
 
 use super::ExecutionResult;
 
-// TODO: isolate
-pub async fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
-    let source_path = temp_dir.join("Main.java");
+pub async fn run_python_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
+    let source_path = temp_dir.join("main.py");
 
     std::fs::write(&source_path, code).expect("Unable to write file");
 
-    let output = Command::new("java")
-        .arg(&source_path)
-        .output()
-        .await
-        .expect("Failed to execute Java code");
+    let output = execute_isolate(
+        temp_dir,
+        &std::path::PathBuf::from("/usr/bin/python3.11"),
+        &[source_path],
+    );
 
     if !output.status.success() {
         return ExecutionResult {

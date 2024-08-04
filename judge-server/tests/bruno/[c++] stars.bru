@@ -1,5 +1,5 @@
 meta {
-  name: [C] stars
+  name: [c++] stars
   type: http
   seq: 1
 }
@@ -16,8 +16,8 @@ headers {
 
 body:json {
   {
-    "language": "C",
-    "code": "#include <stdio.h>\nint main() { for (int i = 0; i < 5; i++) { for (int j = 0; j <= i; j++) {printf(\"*\");}\n printf(\"\\n\");}\n return 0;\n}"
+    "language": "CPP",
+    "code": "#include <iostream>\nint main() { for (int i = 0; i < 5; i++) { for (int j = 0; j <= i; j++) {std::cout << \"*\";}\n std::cout << \"\\n\";}\n return 0;\n}"
   }
 }
 

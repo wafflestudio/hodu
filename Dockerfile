@@ -29,8 +29,14 @@ FROM debian:12.6-slim AS runner
 RUN apt-get update && apt-get --no-install-recommends install -y \
   # language: c
   gcc libc6-dev \
+  # language: c++
+  g++ \
   # language: java
   openjdk-17-jdk \
+  # language: python
+  python3 \
+  # language: javascript
+  nodejs \
   # clean
   && rm -rf /var/lib/apt/lists/* \
   && apt-get clean

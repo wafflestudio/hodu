@@ -1,0 +1,26 @@
+meta {
+  name: [python] single print
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://127.0.0.1:8080/submit
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "language": "PYTHON",
+    "code": "print(\"Hello\")"
+  }
+}
+
+assert {
+  res.body.stdout: eq Hello\n
+}
