@@ -1,9 +1,9 @@
 #
-# build waffle-judge
+# build hodu
 #
-FROM rust:1.80.0-slim AS waffle-judge-builder
+FROM rust:1.80.0-slim AS hodu-builder
 
-WORKDIR /usr/src/waffle-judge
+WORKDIR /usr/src/hodu
 COPY . .
 RUN cargo build --release
 
@@ -42,9 +42,9 @@ RUN apt-get update && apt-get --no-install-recommends install -y \
   && apt-get clean
 
 # copy bin
-COPY --from=waffle-judge-builder /usr/src/waffle-judge/target/release/judge-server /usr/local/bin/judge-server
+COPY --from=hodu-builder /usr/src/hodu/target/release/hodu-server /usr/local/bin/hodu-server
 COPY --from=isolate-builder /usr/src/isolate/isolate /usr/local/bin/isolate
 COPY --from=isolate-builder /usr/src/isolate/isolate-check-environment /usr/local/bin/isolate-check-environment
 COPY --from=isolate-builder /usr/src/isolate/default.cf /usr/local/etc/isolate
 
-ENTRYPOINT ["/usr/local/bin/judge-server"]
+ENTRYPOINT ["/usr/local/bin/hodu-server"]

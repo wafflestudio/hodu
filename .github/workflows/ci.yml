@@ -16,12 +16,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build & Run Server
         run: |
-          docker build -t waffle-judge .
-          docker run --privileged -dp 8080:8080 waffle-judge
+          docker build -t hodu .
+          docker run --privileged -dp 8080:8080 hodu
       - name: Install Test Cli
         run: |
           npm install -g @usebruno/cli
       - name: Run Tests
-        working-directory: judge-server/tests/bruno
+        working-directory: hodu-server/tests/bruno
         run: |
           bru run
