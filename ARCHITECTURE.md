@@ -3,7 +3,7 @@
 ## 동작
 
 - 실행 시 `http://127.0.0.1:8080` 에 서버를 띄웁니다.
-- `POST /submit` 경로에 `{ language: String, code: String }` 형태의 JSON 데이터를 받습니다.
+- `POST /api/v1/submit` 경로에 `{ language: String, code: String }` 형태의 JSON 데이터를 받습니다.
 - 받은 데이터를 language 에 따라 비동기적으로 컴파일하고 실행합니다.
 - 실행 결과를 JSON 형태로 반환합니다.
 
@@ -16,7 +16,7 @@
   - isolate 가 매 실행마다 격리된 box를 생성합니다.
   - 해당 box 안에 코드를 저장하고, `node` `gcc` `python3` 등의 도구를 이용하여 컴파일 및 실행합니다.
   - 실행이 끝나면 isolate 를 통해 격리된 box를 제거합니다.
-- API 콜 테스트 및 자동화 테스트에는 Bruno 를 활용합니다. Bruno Collection 은 [여기](./tests/bruno) 에 있습니다.
+- API 콜 테스트 및 자동화 테스트에는 Bruno 를 활용합니다. Bruno Collection 은 [여기](./hodu-server/tests/bruno) 에 있습니다.
 
 ## 배포
 
