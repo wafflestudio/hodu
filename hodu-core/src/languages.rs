@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-pub mod c;
-pub mod cpp;
-pub mod java;
-pub mod javascript;
-pub mod python;
+mod c;
+mod cpp;
+mod java;
+mod javascript;
+mod python;
 
 #[derive(Deserialize)]
 pub enum Language {
@@ -32,4 +32,14 @@ pub struct ExecutionParams {
 pub struct ExecutionCommand {
     pub binary: String,
     pub args: Vec<String>,
+}
+
+pub async fn mark_code(language: &Language, code: String) -> ExecutionResult {
+    match language {
+        Language::C => c::run_c_code(&code).await,
+        Language::CPP => cpp::run_cpp_code(&code).await,
+        Language::JAVA => java::run_java_code(&code).await,
+        Language::PYTHON => python::run_python_code(&code).await,
+        Language::JAVASCRIPT => javascript::run_javascript_code(&code).await,
+    }
 }

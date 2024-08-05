@@ -2,9 +2,7 @@ use actix_web::{get, post, web, App, HttpServer, Responder};
 use serde::Deserialize;
 
 extern crate hodu_core;
-use hodu_core::{
-    run_c_code, run_cpp_code, run_java_code, run_javascript_code, run_python_code, Language,
-};
+use hodu_core::{mark_code, Language};
 
 #[derive(Deserialize)]
 struct CodeSubmission {
@@ -19,13 +17,7 @@ async fn ping() -> impl Responder {
 
 #[post("/submit")]
 async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
-    let output = match submission.language {
-        Language::C => run_c_code(&submission.code).await,
-        Language::CPP => run_cpp_code(&submission.code).await,
-        Language::JAVA => run_java_code(&submission.code).await,
-        Language::PYTHON => run_python_code(&submission.code).await,
-        Language::JAVASCRIPT => run_javascript_code(&submission.code).await,
-    };
+    let output = mark_code(&submission.language, submission.code.clone()).await;
 
     web::Json(output)
 }
