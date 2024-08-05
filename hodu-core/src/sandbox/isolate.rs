@@ -1,9 +1,10 @@
+pub use error::Error;
 use rand::Rng;
 use tokio::process::Command;
 
 use crate::languages::{ExecutionParams, ExecutionResult};
 
-pub async fn execute_isolate(params: ExecutionParams) -> ExecutionResult {
+pub async fn execute_isolate(params: ExecutionParams) -> Result<ExecutionResult, Error> {
     let box_id = rand::thread_rng().gen_range(0..1000);
     let box_id_arg = format!("--box-id={}", box_id);
 
@@ -12,7 +13,7 @@ pub async fn execute_isolate(params: ExecutionParams) -> ExecutionResult {
         .arg("--init")
         .output()
         .await
-        .expect("Failed to init box");
+        .map_err(Error::IsolateInitError)?;
 
     let working_directory = format!(
         "{}/box",
@@ -30,14 +31,14 @@ pub async fn execute_isolate(params: ExecutionParams) -> ExecutionResult {
             .args(&compile_command.args)
             .output()
             .await
-            .expect("Failed to compile");
+            .map_err(Error::IsolateRunError)?;
 
         if !compile_output.status.success() {
-            return ExecutionResult {
+            return Ok(ExecutionResult {
                 stdout: String::new(),
                 stderr: String::from_utf8(compile_output.stderr).expect("Invalid runtime error"),
                 success: false,
-            };
+            });
         }
     }
 
@@ -49,26 +50,38 @@ pub async fn execute_isolate(params: ExecutionParams) -> ExecutionResult {
         .args(&params.execute_command.args)
         .output()
         .await
-        .expect("Failed to execute");
+        .map_err(Error::IsolateRunError)?;
 
     Command::new("isolate")
         .arg(&box_id_arg)
         .arg("--cleanup")
         .output()
         .await
-        .expect("Failed to cleanup box");
+        .map_err(Error::IsolateCleanupError)?;
 
     if !run_output.status.success() {
-        return ExecutionResult {
+        return Ok(ExecutionResult {
             stdout: String::new(),
             stderr: String::from_utf8(run_output.stderr).expect("Invalid runtime error"),
             success: false,
-        };
+        });
     }
 
-    ExecutionResult {
+    Ok(ExecutionResult {
         stdout: String::from_utf8(run_output.stdout).expect("Invalid output"),
         stderr: String::new(),
         success: true,
+    })
+}
+
+pub mod error {
+    #[derive(thiserror::Error, Debug)]
+    pub enum Error {
+        #[error("Error while initiating isolate")]
+        IsolateInitError(#[source] tokio::io::Error),
+        #[error("Error while running isolate")]
+        IsolateRunError(#[source] tokio::io::Error),
+        #[error("Error while cleaning up isolate")]
+        IsolateCleanupError(#[source] tokio::io::Error),
     }
 }

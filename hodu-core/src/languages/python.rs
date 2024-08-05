@@ -1,8 +1,8 @@
-use crate::{sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
+use crate::{error::HoduCoreError, sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
 
 use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
 
-pub async fn run_python_code(code: &str) -> ExecutionResult {
+pub async fn run_python_code(code: &str) -> Result<ExecutionResult, HoduCoreError> {
     let python3 = get_binary_path("python3").await;
 
     execute_isolate(ExecutionParams {
@@ -15,4 +15,5 @@ pub async fn run_python_code(code: &str) -> ExecutionResult {
         },
     })
     .await
+    .map_err(HoduCoreError::IsolateError)
 }

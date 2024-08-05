@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
 
+use crate::error::HoduCoreError;
+
 mod c;
 mod cpp;
 mod java;
 mod javascript;
 mod python;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub enum Language {
     C,
     CPP,
@@ -34,7 +36,7 @@ pub struct ExecutionCommand {
     pub args: Vec<String>,
 }
 
-pub async fn mark_code(language: &Language, code: String) -> ExecutionResult {
+pub async fn mark_code(language: &Language, code: String) -> Result<ExecutionResult, HoduCoreError> {
     match language {
         Language::C => c::run_c_code(&code).await,
         Language::CPP => cpp::run_cpp_code(&code).await,
