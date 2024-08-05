@@ -1,6 +1,5 @@
 use actix_web::{get, post, web, App, HttpServer, Responder};
 use serde::Deserialize;
-use uuid::Uuid;
 
 extern crate hodu_core;
 use hodu_core::{
@@ -20,17 +19,13 @@ async fn ping() -> impl Responder {
 
 #[post("/submit")]
 async fn submit_code(submission: web::Json<CodeSubmission>) -> impl Responder {
-    let temp_dir = create_hodu_folder();
-
     let output = match submission.language {
-        Language::C => run_c_code(&submission.code, &temp_dir).await,
-        Language::CPP => run_cpp_code(&submission.code, &temp_dir).await,
-        Language::JAVA => run_java_code(&submission.code, &temp_dir).await,
-        Language::PYTHON => run_python_code(&submission.code, &temp_dir).await,
-        Language::JAVASCRIPT => run_javascript_code(&submission.code, &temp_dir).await,
+        Language::C => run_c_code(&submission.code).await,
+        Language::CPP => run_cpp_code(&submission.code).await,
+        Language::JAVA => run_java_code(&submission.code).await,
+        Language::PYTHON => run_python_code(&submission.code).await,
+        Language::JAVASCRIPT => run_javascript_code(&submission.code).await,
     };
-
-    std::fs::remove_dir_all(temp_dir).unwrap();
 
     web::Json(output)
 }
@@ -41,15 +36,4 @@ async fn main() -> std::io::Result<()> {
         .bind("0.0.0.0:8080")?
         .run()
         .await
-}
-
-fn create_hodu_folder() -> std::path::PathBuf {
-    let home_dir = std::env::var("HOME").expect("cannot find home directory");
-    let random_string: String = Uuid::new_v4().to_string();
-    let hodu_dir = format!("{}/.hodu/temp", home_dir);
-    std::fs::create_dir_all(&hodu_dir).unwrap();
-    let temp_dir = format!("{}/.hodu/temp/{}", home_dir, random_string);
-    let temp_dir = std::path::Path::new(&temp_dir);
-    std::fs::create_dir_all(&temp_dir).unwrap();
-    temp_dir.to_path_buf()
 }

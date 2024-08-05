@@ -17,7 +17,19 @@ pub enum Language {
 
 #[derive(Serialize)]
 pub struct ExecutionResult {
-    stdout: String,
-    stderr: String,
-    success: bool,
+    pub stdout: String,
+    pub stderr: String,
+    pub success: bool,
+}
+
+pub struct ExecutionParams {
+    pub code: String,
+    pub filename: String,
+    pub compile_command: Option<ExecutionCommand>,
+    pub execute_command: ExecutionCommand,
+}
+
+pub struct ExecutionCommand {
+    pub binary: String,
+    pub args: Vec<String>,
 }

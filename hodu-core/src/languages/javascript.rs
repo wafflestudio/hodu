@@ -1,30 +1,16 @@
-use tokio::process::Command;
+use crate::sandbox::isolate::execute_isolate;
 
-use super::ExecutionResult;
+use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
 
-// TODO: isolate
-pub async fn run_javascript_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
-    let source_path = temp_dir.join("main.js");
-
-    std::fs::write(&source_path, code).expect("Unable to write file");
-
-    let output = Command::new("node")
-        .arg(&source_path)
-        .output()
-        .await
-        .expect("Failed to execute JavaScript code");
-
-    if !output.status.success() {
-        return ExecutionResult {
-            stdout: String::new(),
-            stderr: String::from_utf8(output.stderr).expect("Invalid runtime error"),
-            success: false,
-        };
-    }
-
-    ExecutionResult {
-        stdout: String::from_utf8(output.stdout).expect("Invalid output"),
-        stderr: String::new(),
-        success: true,
-    }
+pub async fn run_javascript_code(code: &str) -> ExecutionResult {
+    execute_isolate(ExecutionParams {
+        code: code.to_string(),
+        filename: "main.mjs".to_string(),
+        compile_command: None,
+        execute_command: ExecutionCommand {
+            binary: "/usr/bin/node".to_string(),
+            args: vec!["./main.mjs".to_string()],
+        },
+    })
+    .await
 }

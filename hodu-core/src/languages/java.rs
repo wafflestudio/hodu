@@ -1,30 +1,19 @@
-use tokio::process::Command;
+use crate::sandbox::isolate::execute_isolate;
 
-use super::ExecutionResult;
+use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
 
-// TODO: isolate
-pub async fn run_java_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
-    let source_path = temp_dir.join("Main.java");
-
-    std::fs::write(&source_path, code).expect("Unable to write file");
-
-    let output = Command::new("java")
-        .arg(&source_path)
-        .output()
-        .await
-        .expect("Failed to execute Java code");
-
-    if !output.status.success() {
-        return ExecutionResult {
-            stdout: String::new(),
-            stderr: String::from_utf8(output.stderr).expect("Invalid runtime error"),
-            success: false,
-        };
-    }
-
-    ExecutionResult {
-        stdout: String::from_utf8(output.stdout).expect("Invalid output"),
-        stderr: String::new(),
-        success: true,
-    }
+pub async fn run_java_code(code: &str) -> ExecutionResult {
+    execute_isolate(ExecutionParams {
+        code: code.to_string(),
+        filename: "Main.java".to_string(),
+        compile_command: Some(ExecutionCommand {
+            binary: "/usr/lib/jvm/java-17-openjdk-arm64/bin/javac".to_string(),
+            args: vec!["./Main.java".to_string()],
+        }),
+        execute_command: ExecutionCommand {
+            binary: "/usr/lib/jvm/java-17-openjdk-arm64/bin/java".to_string(),
+            args: vec!["Main".to_string()],
+        },
+    })
+    .await
 }

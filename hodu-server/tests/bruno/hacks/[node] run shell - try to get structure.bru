@@ -1,0 +1,26 @@
+meta {
+  name: [node] run shell - try to get structure
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://127.0.0.1:8080/submit
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "language": "JAVASCRIPT",
+    "code": "import { exec } from 'child_process'; const execa = (cmd) => new Promise((res) => exec(cmd, (err, stdout, stderr) => res((err ? stderr : stdout).trim()))); const pwd = await execa('pwd'); console.log(pwd);"
+  }
+}
+
+assert {
+  res.body.stdout: eq /box\n
+}
