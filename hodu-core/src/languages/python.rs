@@ -1,29 +1,18 @@
-use crate::sandbox::isolate::execute_isolate;
+use crate::{sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
 
-use super::ExecutionResult;
+use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
 
-pub async fn run_python_code(code: &str, temp_dir: &std::path::PathBuf) -> ExecutionResult {
-    let source_path = temp_dir.join("main.py");
+pub async fn run_python_code(code: &str) -> ExecutionResult {
+    let python3 = get_binary_path("python3").await;
 
-    std::fs::write(&source_path, code).expect("Unable to write file");
-
-    let output = execute_isolate(
-        temp_dir,
-        &std::path::PathBuf::from("/usr/bin/python3.11"),
-        &[source_path],
-    );
-
-    if !output.status.success() {
-        return ExecutionResult {
-            stdout: String::new(),
-            stderr: String::from_utf8(output.stderr).expect("Invalid runtime error"),
-            success: false,
-        };
-    }
-
-    ExecutionResult {
-        stdout: String::from_utf8(output.stdout).expect("Invalid output"),
-        stderr: String::new(),
-        success: true,
-    }
+    execute_isolate(ExecutionParams {
+        code: code.to_string(),
+        filename: "main.py".to_string(),
+        compile_command: None,
+        execute_command: ExecutionCommand {
+            binary: python3,
+            args: vec!["./main.py".to_string()],
+        },
+    })
+    .await
 }

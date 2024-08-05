@@ -1,5 +1,5 @@
 meta {
-  name: [c] run shell - ls
+  name: [c] run shell - shutdown
   type: http
   seq: 2
 }
@@ -17,7 +17,7 @@ headers {
 body:json {
   {
     "language": "C",
-    "code": "#include <stdlib.h>\nint main() { int result = system(\"ls -a\"); printf(\"%d\", result); }"
+    "code": "#include <stdlib.h>\n#include <stdio.h>\nint main() { int result = system(\"shutdown\"); printf(\"%d\", result); }"
   }
 }
 
