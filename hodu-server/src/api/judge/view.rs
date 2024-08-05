@@ -14,7 +14,9 @@ async fn submit_code(
         submission.language
     );
 
-    let output = mark_code(&submission.language, submission.code.clone()).await.map_err(HoduError::CodeExecutionError)?;
+    let output = mark_code(&submission.language, submission.code.clone())
+        .await
+        .map_err(HoduError::CodeExecutionError)?;
 
     Ok(web::Json(output))
 }
