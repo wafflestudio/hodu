@@ -1,23 +1,42 @@
-use crate::{error::HoduCoreError, sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
+use crate::{
+    sandbox::{ExecutionCommand, ExecutionResult, Sandbox},
+    utils::get_binary_path::get_binary_path,
+};
 
-use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
+use super::LanguageExecutor;
 
-pub async fn run_java_code(code: &str) -> Result<ExecutionResult, HoduCoreError> {
-    let java = get_binary_path("java").await;
-    let javac = get_binary_path("javac").await;
+pub struct JavaExecutor {}
 
-    execute_isolate(ExecutionParams {
-        code: code.to_string(),
-        filename: "Main.java".to_string(),
-        compile_command: Some(ExecutionCommand {
-            binary: javac,
-            args: vec!["./Main.java".to_string()],
-        }),
-        execute_command: ExecutionCommand {
-            binary: java,
-            args: vec!["Main".to_string()],
-        },
-    })
-    .await
-    .map_err(HoduCoreError::IsolateError)
+impl LanguageExecutor for JavaExecutor {
+    async fn run<S: Sandbox>(&self, code: &str, sandbox: &S) -> ExecutionResult {
+        sandbox.add_file("./Main.java", code).await;
+
+        let java = get_binary_path("java").await;
+
+        let compile_result = sandbox
+            .execute(
+                ExecutionCommand {
+                    binary: "javac",
+                    args: vec!["./Main.java"],
+                },
+                false,
+            )
+            .await;
+
+        if !compile_result.success {
+            return compile_result;
+        }
+
+        let execute_result = sandbox
+            .execute(
+                ExecutionCommand {
+                    binary: &java,
+                    args: vec!["Main"],
+                },
+                true,
+            )
+            .await;
+
+        execute_result
+    }
 }

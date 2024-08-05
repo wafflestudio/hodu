@@ -1,87 +1,88 @@
-pub use error::Error;
 use rand::Rng;
+use std::path::PathBuf;
 use tokio::process::Command;
 
-use crate::languages::{ExecutionParams, ExecutionResult};
+use super::{ExecutionCommand, ExecutionResult, Sandbox, SandboxEnvironment};
 
-pub async fn execute_isolate(params: ExecutionParams) -> Result<ExecutionResult, Error> {
-    let box_id = rand::thread_rng().gen_range(0..1000);
-    let box_id_arg = format!("--box-id={}", box_id);
+pub struct Isolate {
+    box_id: i32,
+    path: PathBuf,
+    memory_limit: u32,
+    time_limit: u32,
+}
 
-    let init_output = Command::new("isolate")
-        .arg(&box_id_arg)
-        .arg("--init")
-        .output()
-        .await
-        .map_err(Error::IsolateInitError)?;
-
-    let working_directory = format!(
-        "{}/box",
-        std::str::from_utf8(&init_output.stdout)
-            .expect("Invalid output")
-            .trim(),
-    );
-    let source_path = format!("{}/{}", working_directory, params.filename);
-
-    std::fs::write(source_path, params.code).expect("Failed to write file");
-
-    if let Some(compile_command) = params.compile_command {
-        let compile_output = Command::new(compile_command.binary)
-            .current_dir(&working_directory)
-            .args(&compile_command.args)
+impl Sandbox for Isolate {
+    async fn create(environment: SandboxEnvironment) -> Self {
+        let box_id = rand::thread_rng().gen_range(0..1000);
+        let init_output = Command::new("isolate")
+            .arg(format!("--box-id={}", box_id))
+            .arg("--init")
             .output()
             .await
-            .map_err(Error::IsolateRunError)?;
+            .expect("Failed to init box");
 
-        if !compile_output.status.success() {
-            return Ok(ExecutionResult {
-                stdout: String::new(),
-                stderr: String::from_utf8(compile_output.stderr).expect("Invalid runtime error"),
-                success: false,
-            });
+        let working_directory = format!(
+            "{}/box",
+            std::str::from_utf8(&init_output.stdout)
+                .expect("Invalid output")
+                .trim()
+        );
+
+        Isolate {
+            box_id,
+            path: PathBuf::from(working_directory),
+            memory_limit: environment.memory_limit,
+            time_limit: environment.time_limit,
         }
     }
 
-    let run_output = Command::new("isolate")
-        .arg(&box_id_arg)
-        .arg("--run")
-        .arg("-p128")
-        .arg(params.execute_command.binary)
-        .args(&params.execute_command.args)
-        .output()
-        .await
-        .map_err(Error::IsolateRunError)?;
+    async fn add_file(&self, filename: &str, content: &str) {
+        let source_path = format!("{}/{}", self.path.to_str().unwrap().trim(), filename);
 
-    Command::new("isolate")
-        .arg(&box_id_arg)
-        .arg("--cleanup")
-        .output()
-        .await
-        .map_err(Error::IsolateCleanupError)?;
-
-    if !run_output.status.success() {
-        return Ok(ExecutionResult {
-            stdout: String::new(),
-            stderr: String::from_utf8(run_output.stderr).expect("Invalid runtime error"),
-            success: false,
-        });
+        std::fs::write(source_path, content).expect("Failed to write file");
     }
 
-    Ok(ExecutionResult {
-        stdout: String::from_utf8(run_output.stdout).expect("Invalid output"),
-        stderr: String::new(),
-        success: true,
-    })
-}
+    async fn execute(&self, command: ExecutionCommand<'_>, sandboxed: bool) -> ExecutionResult {
+        let run_output = match sandboxed {
+            true => Command::new("isolate")
+                .arg(format!("--box-id={}", self.box_id))
+                .arg("--run")
+                .arg(format!("--processes={}", 128))
+                .arg(format!("--time={}", self.time_limit))
+                .arg(format!("--mem={}", self.memory_limit))
+                .arg(command.binary)
+                .args(&command.args)
+                .output()
+                .await
+                .expect("Failed to execute"),
+            false => Command::new(command.binary)
+                .args(&command.args)
+                .current_dir(&self.path)
+                .output()
+                .await
+                .expect("Failed to execute"),
+        };
 
-pub mod error {
-    #[derive(thiserror::Error, Debug)]
-    pub enum Error {
-        #[error("Error while initiating isolate")]
-        IsolateInitError(#[source] tokio::io::Error),
-        #[error("Error while running isolate")]
-        IsolateRunError(#[source] tokio::io::Error),
-        #[error("Error while cleaning up isolate")]
-        IsolateCleanupError(#[source] tokio::io::Error),
+        ExecutionResult {
+            output: match run_output.status.success() {
+                true => std::str::from_utf8(&run_output.stdout)
+                    .expect("Invalid output")
+                    .to_string(),
+
+                false => std::str::from_utf8(&run_output.stderr)
+                    .expect("Invalid output")
+                    .to_string(),
+            },
+            success: run_output.status.success(),
+        }
+    }
+
+    async fn destroy(&self) {
+        Command::new("isolate")
+            .arg(format!("--box-id={}", self.box_id))
+            .arg("--cleanup")
+            .output()
+            .await
+            .expect("Failed to cleanup box");
     }
 }

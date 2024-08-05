@@ -14,5 +14,5 @@ pub async fn get_binary_path(binary: &str) -> String {
     let output = std::fs::canonicalize(String::from_utf8(which.stdout).unwrap().trim().to_string())
         .expect("failed");
 
-    output.to_str().unwrap().to_string()
+    output.to_str().expect("could not find binary").to_string()
 }

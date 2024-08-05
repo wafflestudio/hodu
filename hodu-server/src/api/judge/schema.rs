@@ -1,12 +1,10 @@
-use hodu_core::Language;
-use serde::Deserialize;
 use uuid::Uuid;
 
-#[derive(Deserialize)]
+#[derive(serde::Deserialize)]
 pub struct CodeSubmission {
     #[serde(default = "default_id")]
     pub id: String,
-    pub language: Language,
+    pub language: String,
     pub code: String,
 }
 
