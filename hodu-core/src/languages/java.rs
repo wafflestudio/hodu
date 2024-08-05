@@ -1,10 +1,10 @@
-use crate::{sandbox::isolate::execute_isolate, utils::realpath::realpath};
+use crate::{sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
 
 use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
 
 pub async fn run_java_code(code: &str) -> ExecutionResult {
-    let java = realpath("java").await;
-    let javac = realpath("javac").await;
+    let java = get_binary_path("java").await;
+    let javac = get_binary_path("javac").await;
 
     execute_isolate(ExecutionParams {
         code: code.to_string(),

@@ -7,5 +7,5 @@ mod sandbox {
     pub mod isolate;
 }
 mod utils {
-    pub mod realpath;
+    pub mod get_binary_path;
 }
