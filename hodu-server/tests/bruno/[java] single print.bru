@@ -17,10 +17,11 @@ headers {
 body:json {
   {
     "language": "JAVA",
-    "code": "public class Main { public static void main(String[] args) { System.out.println(\"*\");\n } }"
+    "code": "public class Main { public static void main(String[] args) { System.out.println(\"*\"); } }"
   }
 }
 
 assert {
   res.body.stdout: eq *\n
+  res.body.stderr: eq 
 }
