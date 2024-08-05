@@ -7,7 +7,7 @@ mod utils {
 
 use languages::{
     c::CExecutor, cpp::CppExecutor, java::JavaExecutor, javascript::JavaScriptExecutor,
-    python::PythonExecutor, LanguageExecutor,
+    python::PythonExecutor, ExecutionResult, LanguageExecutor,
 };
 use sandbox::{isolate::Isolate, Sandbox, SandboxEnvironment};
 
@@ -30,8 +30,7 @@ pub struct MarkParams<'a> {
 
 pub struct MarkResult {
     pub status: MarkResultStatus,
-    pub time: u32,
-    pub memory: u32,
+    pub time: f64,
     pub stdout: String,
     pub stderr: String,
 }
@@ -62,18 +61,23 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
 
     sandbox.destroy().await;
 
-    // TODO: implement
     MarkResult {
-        status: MarkResultStatus::Correct,
-        time: 0,
-        memory: 0,
-        stdout: match &execute_result.success {
-            true => execute_result.output.to_string(),
-            false => String::new(),
+        status: match &execute_result {
+            // TODO: implement
+            ExecutionResult::Success(_) => MarkResultStatus::Correct,
+            ExecutionResult::CompileError(_) => MarkResultStatus::CompileError,
         },
-        stderr: match &execute_result.success {
-            true => String::new(),
-            false => execute_result.output.to_string(),
+        time: match &execute_result {
+            ExecutionResult::Success(result) => result.time,
+            ExecutionResult::CompileError(_) => 0.0,
+        },
+        stdout: match &execute_result {
+            ExecutionResult::Success(result) => result.stdout.clone(),
+            ExecutionResult::CompileError(result) => result.stdout.clone(),
+        },
+        stderr: match &execute_result {
+            ExecutionResult::Success(result) => result.stderr.clone(),
+            ExecutionResult::CompileError(result) => result.stderr.clone(),
         },
     }
 }

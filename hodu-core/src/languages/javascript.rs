@@ -1,9 +1,9 @@
 use crate::{
-    sandbox::{ExecutionCommand, ExecutionResult, Sandbox},
+    sandbox::{Sandbox, SandboxCommand},
     utils::get_binary_path::get_binary_path,
 };
 
-use super::LanguageExecutor;
+use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
 pub struct JavaScriptExecutor {}
 
@@ -15,7 +15,7 @@ impl LanguageExecutor for JavaScriptExecutor {
 
         let execute_result = sandbox
             .execute(
-                ExecutionCommand {
+                SandboxCommand {
                     binary: &node,
                     args: vec!["./main.mjs"],
                 },
@@ -23,6 +23,10 @@ impl LanguageExecutor for JavaScriptExecutor {
             )
             .await;
 
-        execute_result
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
     }
 }

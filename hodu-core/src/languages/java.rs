@@ -1,9 +1,9 @@
 use crate::{
-    sandbox::{ExecutionCommand, ExecutionResult, Sandbox},
+    sandbox::{Sandbox, SandboxCommand},
     utils::get_binary_path::get_binary_path,
 };
 
-use super::LanguageExecutor;
+use super::{ExecutionErrorOutput, ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
 pub struct JavaExecutor {}
 
@@ -15,7 +15,7 @@ impl LanguageExecutor for JavaExecutor {
 
         let compile_result = sandbox
             .execute(
-                ExecutionCommand {
+                SandboxCommand {
                     binary: "javac",
                     args: vec!["./Main.java"],
                 },
@@ -24,12 +24,15 @@ impl LanguageExecutor for JavaExecutor {
             .await;
 
         if !compile_result.success {
-            return compile_result;
+            return ExecutionResult::CompileError(ExecutionErrorOutput {
+                stdout: compile_result.stdout,
+                stderr: compile_result.stderr,
+            });
         }
 
         let execute_result = sandbox
             .execute(
-                ExecutionCommand {
+                SandboxCommand {
                     binary: &java,
                     args: vec!["Main"],
                 },
@@ -37,6 +40,10 @@ impl LanguageExecutor for JavaExecutor {
             )
             .await;
 
-        execute_result
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
     }
 }

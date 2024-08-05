@@ -1,6 +1,6 @@
-use crate::sandbox::{ExecutionCommand, ExecutionResult, Sandbox};
+use crate::sandbox::{Sandbox, SandboxCommand};
 
-use super::LanguageExecutor;
+use super::{ExecutionErrorOutput, ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
 pub struct CExecutor {}
 
@@ -10,7 +10,7 @@ impl LanguageExecutor for CExecutor {
 
         let compile_result = sandbox
             .execute(
-                ExecutionCommand {
+                SandboxCommand {
                     binary: "gcc",
                     args: vec!["-o", "./main", "./main.c"],
                 },
@@ -19,15 +19,15 @@ impl LanguageExecutor for CExecutor {
             .await;
 
         if !compile_result.success {
-            return ExecutionResult {
-                output: compile_result.output,
-                success: false,
-            };
+            return ExecutionResult::CompileError(ExecutionErrorOutput {
+                stdout: compile_result.stdout,
+                stderr: compile_result.stderr,
+            });
         }
 
         let execute_result = sandbox
             .execute(
-                ExecutionCommand {
+                SandboxCommand {
                     binary: "./main",
                     args: vec![],
                 },
@@ -35,6 +35,10 @@ impl LanguageExecutor for CExecutor {
             )
             .await;
 
-        execute_result
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
     }
 }

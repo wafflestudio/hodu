@@ -1,12 +1,14 @@
 pub mod isolate;
 
-pub struct ExecutionCommand<'a> {
+pub struct SandboxCommand<'a> {
     pub binary: &'a str,
     pub args: Vec<&'a str>,
 }
 
-pub struct ExecutionResult {
-    pub output: String,
+pub struct SandboxResult {
+    pub stdout: String,
+    pub stderr: String,
+    pub time: f64,
     pub success: bool,
 }
 
@@ -18,6 +20,6 @@ pub struct SandboxEnvironment {
 pub trait Sandbox {
     async fn create(environment: SandboxEnvironment) -> Self;
     async fn add_file(&self, filename: &str, content: &str);
-    async fn execute(&self, command: ExecutionCommand, sandboxed: bool) -> ExecutionResult;
+    async fn execute(&self, command: SandboxCommand, sandboxed: bool) -> SandboxResult;
     async fn destroy(&self);
 }

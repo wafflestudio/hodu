@@ -1,8 +1,9 @@
 use rand::Rng;
+use regex::Regex;
 use std::path::PathBuf;
 use tokio::process::Command;
 
-use super::{ExecutionCommand, ExecutionResult, Sandbox, SandboxEnvironment};
+use super::{Sandbox, SandboxCommand, SandboxEnvironment, SandboxResult};
 
 pub struct Isolate {
     box_id: i32,
@@ -42,14 +43,15 @@ impl Sandbox for Isolate {
         std::fs::write(source_path, content).expect("Failed to write file");
     }
 
-    async fn execute(&self, command: ExecutionCommand<'_>, sandboxed: bool) -> ExecutionResult {
+    async fn execute(&self, command: SandboxCommand<'_>, sandboxed: bool) -> SandboxResult {
         let run_output = match sandboxed {
             true => Command::new("isolate")
                 .arg(format!("--box-id={}", self.box_id))
-                .arg("--run")
                 .arg(format!("--processes={}", 128))
-                .arg(format!("--time={}", self.time_limit))
-                .arg(format!("--mem={}", self.memory_limit))
+                // TODO: add these. 왜인지 이걸 주면 CI에서 Java 테스트가 터지는데 확인해야 한다.
+                // .arg(format!("--time={}", self.time_limit))
+                // .arg(format!("--mem={}", self.memory_limit))
+                .arg("--run")
                 .arg(command.binary)
                 .args(&command.args)
                 .output()
@@ -63,17 +65,29 @@ impl Sandbox for Isolate {
                 .expect("Failed to execute"),
         };
 
-        ExecutionResult {
-            output: match run_output.status.success() {
-                true => std::str::from_utf8(&run_output.stdout)
-                    .expect("Invalid output")
-                    .to_string(),
-
-                false => std::str::from_utf8(&run_output.stderr)
-                    .expect("Invalid output")
-                    .to_string(),
+        SandboxResult {
+            stdout: match run_output.status.success() {
+                true => String::from_utf8(run_output.stdout.clone()).expect("Invalid output"),
+                false => String::new(),
+            },
+            stderr: match run_output.status.success() {
+                true => String::new(),
+                false => String::from_utf8(run_output.stderr.clone()).expect("Invalid output"),
             },
             success: run_output.status.success(),
+            time: match run_output.status.success() {
+                true => {
+                    let re = Regex::new(r"\((\d+\.\d+) sec real").unwrap();
+                    if let Some(caps) =
+                        re.captures(std::str::from_utf8(&run_output.stderr).expect("failed"))
+                    {
+                        caps[1].parse().unwrap_or(0.0)
+                    } else {
+                        0.0
+                    }
+                }
+                false => 0.0,
+            },
         }
     }
 

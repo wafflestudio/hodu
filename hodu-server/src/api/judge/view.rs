@@ -32,6 +32,15 @@ async fn submit_code(
     .await;
 
     Result::Ok(web::Json(serde_json::json!({
+        "status": match output.status {
+                hodu_core::MarkResultStatus::Correct => "correct",
+                hodu_core::MarkResultStatus::Wrong => "wrong",
+                hodu_core::MarkResultStatus::CompileError => "compile_error",
+                hodu_core::MarkResultStatus::RuntimeError => "runtime_error",
+                hodu_core::MarkResultStatus::TimeLimitExceeded => "time_limit_exceeded",
+                hodu_core::MarkResultStatus::MemoryLimitExceeded => "memory_limit_exceeded",
+            },
+        "time": output.time,
         "stdout": output.stdout,
         "stderr": output.stderr,
     })))

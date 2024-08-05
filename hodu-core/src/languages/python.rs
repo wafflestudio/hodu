@@ -1,9 +1,9 @@
 use crate::{
-    sandbox::{ExecutionCommand, ExecutionResult, Sandbox},
+    sandbox::{Sandbox, SandboxCommand},
     utils::get_binary_path::get_binary_path,
 };
 
-use super::LanguageExecutor;
+use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
 pub struct PythonExecutor {}
 
@@ -15,7 +15,7 @@ impl LanguageExecutor for PythonExecutor {
 
         let execute_result = sandbox
             .execute(
-                ExecutionCommand {
+                SandboxCommand {
                     binary: &binary,
                     args: vec!["./main.py"],
                 },
@@ -23,6 +23,10 @@ impl LanguageExecutor for PythonExecutor {
             )
             .await;
 
-        execute_result
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
     }
 }
