@@ -3,7 +3,7 @@ use regex::Regex;
 use std::path::PathBuf;
 use tokio::process::Command;
 
-use super::{Sandbox, SandboxCommand, SandboxEnvironment, SandboxResult};
+use super::{Sandbox, SandboxCommand, SandboxResult, SandboxSpecification};
 
 pub struct Isolate {
     box_id: i32,
@@ -13,7 +13,7 @@ pub struct Isolate {
 }
 
 impl Sandbox for Isolate {
-    async fn create(environment: SandboxEnvironment) -> Self {
+    async fn create(environment: SandboxSpecification) -> Self {
         let box_id = rand::thread_rng().gen_range(0..1000);
         let init_output = Command::new("isolate")
             .arg(format!("--box-id={}", box_id))

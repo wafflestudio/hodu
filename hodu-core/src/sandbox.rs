@@ -12,13 +12,13 @@ pub struct SandboxResult {
     pub success: bool,
 }
 
-pub struct SandboxEnvironment {
+pub struct SandboxSpecification {
     pub memory_limit: u32,
     pub time_limit: u32,
 }
 
 pub trait Sandbox {
-    async fn create(environment: SandboxEnvironment) -> Self;
+    async fn create(environment: SandboxSpecification) -> Self;
     async fn add_file(&self, filename: &str, content: &str);
     async fn execute(&self, command: SandboxCommand, sandboxed: bool) -> SandboxResult;
     async fn destroy(&self);
