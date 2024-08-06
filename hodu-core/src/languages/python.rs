@@ -1,19 +1,32 @@
-use crate::{error::HoduCoreError, sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
+use crate::{
+    sandbox::{Sandbox, SandboxCommand},
+    utils::get_binary_path::get_binary_path,
+};
 
-use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
+use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
-pub async fn run_python_code(code: &str) -> Result<ExecutionResult, HoduCoreError> {
-    let python3 = get_binary_path("python3").await;
+pub struct PythonExecutor {}
 
-    execute_isolate(ExecutionParams {
-        code: code.to_string(),
-        filename: "main.py".to_string(),
-        compile_command: None,
-        execute_command: ExecutionCommand {
-            binary: python3,
-            args: vec!["./main.py".to_string()],
-        },
-    })
-    .await
-    .map_err(HoduCoreError::IsolateError)
+impl LanguageExecutor for PythonExecutor {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
+        sandbox.add_file("./main.py", code).await;
+
+        let binary = get_binary_path("python3").await;
+
+        let execute_result = sandbox
+            .execute(
+                SandboxCommand {
+                    binary: &binary,
+                    args: vec!["./main.py"],
+                },
+                true,
+            )
+            .await;
+
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
+    }
 }

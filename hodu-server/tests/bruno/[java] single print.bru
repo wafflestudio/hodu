@@ -16,7 +16,7 @@ headers {
 
 body:json {
   {
-    "language": "JAVA",
+    "language": "java",
     "code": "public class Main { public static void main(String[] args) { System.out.println(\"*\"); } }"
   }
 }
@@ -24,5 +24,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.stdout: eq *\n
-  res.body.stderr: eq 
+  res.body.stderr: eq
+  res.body.status: eq correct
 }

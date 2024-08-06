@@ -1,23 +1,49 @@
-use crate::{error::HoduCoreError, sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
+use crate::{
+    sandbox::{Sandbox, SandboxCommand},
+    utils::get_binary_path::get_binary_path,
+};
 
-use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
+use super::{ExecutionErrorOutput, ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
-pub async fn run_java_code(code: &str) -> Result<ExecutionResult, HoduCoreError> {
-    let java = get_binary_path("java").await;
-    let javac = get_binary_path("javac").await;
+pub struct JavaExecutor {}
 
-    execute_isolate(ExecutionParams {
-        code: code.to_string(),
-        filename: "Main.java".to_string(),
-        compile_command: Some(ExecutionCommand {
-            binary: javac,
-            args: vec!["./Main.java".to_string()],
-        }),
-        execute_command: ExecutionCommand {
-            binary: java,
-            args: vec!["Main".to_string()],
-        },
-    })
-    .await
-    .map_err(HoduCoreError::IsolateError)
+impl LanguageExecutor for JavaExecutor {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
+        sandbox.add_file("./Main.java", code).await;
+
+        let java = get_binary_path("java").await;
+
+        let compile_result = sandbox
+            .execute(
+                SandboxCommand {
+                    binary: "javac",
+                    args: vec!["./Main.java"],
+                },
+                false,
+            )
+            .await;
+
+        if !compile_result.success {
+            return ExecutionResult::CompileError(ExecutionErrorOutput {
+                stdout: compile_result.stdout,
+                stderr: compile_result.stderr,
+            });
+        }
+
+        let execute_result = sandbox
+            .execute(
+                SandboxCommand {
+                    binary: &java,
+                    args: vec!["Main"],
+                },
+                true,
+            )
+            .await;
+
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
+    }
 }

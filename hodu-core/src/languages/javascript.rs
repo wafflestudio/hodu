@@ -1,19 +1,32 @@
-use crate::{error::HoduCoreError, sandbox::isolate::execute_isolate, utils::get_binary_path::get_binary_path};
+use crate::{
+    sandbox::{Sandbox, SandboxCommand},
+    utils::get_binary_path::get_binary_path,
+};
 
-use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
+use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 
-pub async fn run_javascript_code(code: &str) -> Result<ExecutionResult, HoduCoreError> {
-    let node = get_binary_path("node").await;
+pub struct JavaScriptExecutor {}
 
-    execute_isolate(ExecutionParams {
-        code: code.to_string(),
-        filename: "main.mjs".to_string(),
-        compile_command: None,
-        execute_command: ExecutionCommand {
-            binary: node,
-            args: vec!["./main.mjs".to_string()],
-        },
-    })
-    .await
-    .map_err(HoduCoreError::IsolateError)
+impl LanguageExecutor for JavaScriptExecutor {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
+        sandbox.add_file("./main.mjs", code).await;
+
+        let node = get_binary_path("node").await;
+
+        let execute_result = sandbox
+            .execute(
+                SandboxCommand {
+                    binary: &node,
+                    args: vec!["./main.mjs"],
+                },
+                true,
+            )
+            .await;
+
+        ExecutionResult::Success(ExecutionSuccessOutput {
+            stdout: execute_result.stdout,
+            stderr: execute_result.stderr,
+            time: execute_result.time,
+        })
+    }
 }

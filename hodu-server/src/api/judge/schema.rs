@@ -1,4 +1,3 @@
-use hodu_core::Language;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -12,4 +11,18 @@ pub struct CodeSubmission {
 
 fn default_id() -> String {
     Uuid::new_v4().to_string()
+}
+
+#[derive(Deserialize, Debug)]
+pub enum Language {
+    #[serde(rename = "c")]
+    C,
+    #[serde(rename = "c++")]
+    Cpp,
+    #[serde(rename = "java")]
+    Java,
+    #[serde(rename = "javascript")]
+    Javascript,
+    #[serde(rename = "python")]
+    Python,
 }

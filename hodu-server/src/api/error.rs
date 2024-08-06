@@ -5,8 +5,6 @@ use serde::Serialize;
 pub enum HoduError {
     #[error("PayloadParseError: {0}")]
     PayloadParseError(#[source] actix_web::Error),
-    #[error("CodeExecutionError: {0}")]
-    CodeExecutionError(#[source] hodu_core::HoduCoreError),
 }
 
 #[derive(Serialize, Debug)]
@@ -18,7 +16,6 @@ impl ResponseError for HoduError {
     fn status_code(&self) -> StatusCode {
         match self {
             HoduError::PayloadParseError(_) => StatusCode::BAD_REQUEST,
-            HoduError::CodeExecutionError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
