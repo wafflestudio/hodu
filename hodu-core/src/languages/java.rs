@@ -8,7 +8,7 @@ use super::{ExecutionErrorOutput, ExecutionResult, ExecutionSuccessOutput, Langu
 pub struct JavaExecutor {}
 
 impl LanguageExecutor for JavaExecutor {
-    async fn run<S: Sandbox>(&self, code: &str, sandbox: &S) -> ExecutionResult {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
         sandbox.add_file("./Main.java", code).await;
 
         let java = get_binary_path("java").await;

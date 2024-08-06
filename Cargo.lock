@@ -541,12 +541,8 @@ version = "0.1.0"
 dependencies = [
  "rand",
  "regex",
- "serde",
- "serde_json",
  "thiserror",
  "tokio",
- "tracing",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -558,7 +554,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "tokio",
  "tracing",
  "tracing-subscriber",
  "uuid",

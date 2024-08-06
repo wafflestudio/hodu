@@ -8,7 +8,7 @@ use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 pub struct JavaScriptExecutor {}
 
 impl LanguageExecutor for JavaScriptExecutor {
-    async fn run<S: Sandbox>(&self, code: &str, sandbox: &S) -> ExecutionResult {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
         sandbox.add_file("./main.mjs", code).await;
 
         let node = get_binary_path("node").await;

@@ -1,7 +1,7 @@
 use actix_web::{post, web, Responder};
 use hodu_core::{mark, MarkParams};
 
-use crate::api::{error::HoduError, judge::schema::CodeSubmission};
+use crate::api::{error::HoduError, judge::schema::CodeSubmission, judge::schema::Language};
 
 #[post("/submit")]
 async fn submit_code(
@@ -15,13 +15,12 @@ async fn submit_code(
     );
 
     let output = mark(MarkParams {
-        language: match submission.language.as_str() {
-            "c" => &hodu_core::Language::C,
-            "c++" => &hodu_core::Language::Cpp,
-            "java" => &hodu_core::Language::Java,
-            "python" => &hodu_core::Language::Python,
-            "javascript" => &hodu_core::Language::JavaScript,
-            _ => panic!("Invalid language"),
+        language: match submission.language {
+            Language::C => &hodu_core::Language::C,
+            Language::Cpp => &hodu_core::Language::Cpp,
+            Language::Java => &hodu_core::Language::Java,
+            Language::Javascript => &hodu_core::Language::JavaScript,
+            Language::Python => &hodu_core::Language::Python,
         },
         code: &submission.code,
         expected_stdout: "",

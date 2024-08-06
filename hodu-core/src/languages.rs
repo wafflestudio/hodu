@@ -7,7 +7,7 @@ pub mod javascript;
 pub mod python;
 
 pub trait LanguageExecutor {
-    async fn run<S: Sandbox>(&self, code: &str, sandbox: &S) -> ExecutionResult;
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult;
 }
 
 pub struct ExecutionSuccessOutput {

@@ -5,7 +5,7 @@ use super::{ExecutionErrorOutput, ExecutionResult, ExecutionSuccessOutput, Langu
 pub struct CppExecutor {}
 
 impl LanguageExecutor for CppExecutor {
-    async fn run<S: Sandbox>(&self, code: &str, sandbox: &S) -> ExecutionResult {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
         sandbox.add_file("./main.cpp", code).await;
 
         let compile_result = sandbox

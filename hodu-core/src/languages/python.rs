@@ -8,7 +8,7 @@ use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
 pub struct PythonExecutor {}
 
 impl LanguageExecutor for PythonExecutor {
-    async fn run<S: Sandbox>(&self, code: &str, sandbox: &S) -> ExecutionResult {
+    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
         sandbox.add_file("./main.py", code).await;
 
         let binary = get_binary_path("python3").await;
