@@ -1,20 +1,23 @@
-use crate::sandbox::{Sandbox, SandboxCommand};
+use crate::sandbox::{Sandbox, SandboxCommand, SandboxExecuteOptions};
 
-use super::{ExecutionErrorOutput, ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
+use super::{
+    ExecutionErrorOutput, ExecutionParams, ExecutionResult, ExecutionSuccessOutput,
+    LanguageExecutor,
+};
 
 pub struct CppExecutor {}
 
 impl LanguageExecutor for CppExecutor {
-    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
-        sandbox.add_file("./main.cpp", code).await;
+    async fn run(&self, params: &ExecutionParams<'_>, sandbox: &impl Sandbox) -> ExecutionResult {
+        sandbox.add_file("./main.cpp", params.code).await;
 
         let compile_result = sandbox
             .execute(
-                SandboxCommand {
+                &SandboxCommand {
                     binary: "g++",
                     args: vec!["-o", "./main", "./main.cpp"],
                 },
-                false,
+                &SandboxExecuteOptions::Unsandboxed,
             )
             .await;
 
@@ -27,13 +30,22 @@ impl LanguageExecutor for CppExecutor {
 
         let execute_result = sandbox
             .execute(
-                SandboxCommand {
+                &SandboxCommand {
                     binary: "./main",
                     args: vec![],
                 },
-                true,
+                &SandboxExecuteOptions::Sandboxed {
+                    stdin: params.stdin,
+                },
             )
             .await;
+
+        if !execute_result.success {
+            return ExecutionResult::RuntimeError(ExecutionErrorOutput {
+                stdout: execute_result.stdout,
+                stderr: execute_result.stderr,
+            });
+        }
 
         ExecutionResult::Success(ExecutionSuccessOutput {
             stdout: execute_result.stdout,

@@ -51,33 +51,46 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
     })
     .await;
 
+    let run_params = languages::ExecutionParams {
+        code: params.code,
+        stdin: params.stdin,
+    };
+
     let execute_result = match params.language {
-        Language::C => CExecutor {}.run(params.code, &sandbox).await,
-        Language::Cpp => CppExecutor {}.run(params.code, &sandbox).await,
-        Language::Java => JavaExecutor {}.run(params.code, &sandbox).await,
-        Language::Python => PythonExecutor {}.run(params.code, &sandbox).await,
-        Language::JavaScript => JavaScriptExecutor {}.run(params.code, &sandbox).await,
+        Language::C => CExecutor {}.run(&run_params, &sandbox).await,
+        Language::Cpp => CppExecutor {}.run(&run_params, &sandbox).await,
+        Language::Java => JavaExecutor {}.run(&run_params, &sandbox).await,
+        Language::JavaScript => JavaScriptExecutor {}.run(&run_params, &sandbox).await,
+        Language::Python => PythonExecutor {}.run(&run_params, &sandbox).await,
     };
 
     sandbox.destroy().await;
 
     MarkResult {
         status: match &execute_result {
-            // TODO: implement
-            ExecutionResult::Success(_) => MarkResultStatus::Correct,
+            ExecutionResult::Success(result) => {
+                if result.stdout.trim().eq(params.expected_stdout.trim()) {
+                    MarkResultStatus::Correct
+                } else {
+                    MarkResultStatus::Wrong
+                }
+            }
             ExecutionResult::CompileError(_) => MarkResultStatus::CompileError,
+            ExecutionResult::RuntimeError(_) => MarkResultStatus::RuntimeError,
         },
         time: match &execute_result {
             ExecutionResult::Success(result) => result.time,
-            ExecutionResult::CompileError(_) => 0.0,
+            _ => 0.0,
         },
         stdout: match &execute_result {
             ExecutionResult::Success(result) => result.stdout.clone(),
             ExecutionResult::CompileError(result) => result.stdout.clone(),
+            ExecutionResult::RuntimeError(result) => result.stdout.clone(),
         },
         stderr: match &execute_result {
             ExecutionResult::Success(result) => result.stderr.clone(),
             ExecutionResult::CompileError(result) => result.stderr.clone(),
+            ExecutionResult::RuntimeError(result) => result.stderr.clone(),
         },
     }
 }

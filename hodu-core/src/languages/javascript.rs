@@ -1,27 +1,39 @@
 use crate::{
-    sandbox::{Sandbox, SandboxCommand},
+    sandbox::{Sandbox, SandboxCommand, SandboxExecuteOptions},
     utils::get_binary_path::get_binary_path,
 };
 
-use super::{ExecutionResult, ExecutionSuccessOutput, LanguageExecutor};
+use super::{
+    ExecutionErrorOutput, ExecutionParams, ExecutionResult, ExecutionSuccessOutput,
+    LanguageExecutor,
+};
 
 pub struct JavaScriptExecutor {}
 
 impl LanguageExecutor for JavaScriptExecutor {
-    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult {
-        sandbox.add_file("./main.mjs", code).await;
+    async fn run(&self, params: &ExecutionParams<'_>, sandbox: &impl Sandbox) -> ExecutionResult {
+        sandbox.add_file("./main.mjs", params.code).await;
 
         let node = get_binary_path("node").await;
 
         let execute_result = sandbox
             .execute(
-                SandboxCommand {
+                &SandboxCommand {
                     binary: &node,
                     args: vec!["./main.mjs"],
                 },
-                true,
+                &SandboxExecuteOptions::Sandboxed {
+                    stdin: params.stdin,
+                },
             )
             .await;
+
+        if !execute_result.success {
+            return ExecutionResult::RuntimeError(ExecutionErrorOutput {
+                stdout: execute_result.stdout,
+                stderr: execute_result.stderr,
+            });
+        }
 
         ExecutionResult::Success(ExecutionSuccessOutput {
             stdout: execute_result.stdout,
