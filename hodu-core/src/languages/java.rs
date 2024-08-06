@@ -34,7 +34,7 @@ impl LanguageExecutor for JavaExecutor {
             .execute(
                 SandboxCommand {
                     binary: &java,
-                    args: vec!["Main"],
+                    args: vec!["-Xms32m", "-Xmx128m", "Main"],
                 },
                 true,
             )

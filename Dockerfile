@@ -16,7 +16,7 @@ FROM debian:12.6-slim AS isolate-builder
 RUN apt-get update && apt-get --no-install-recommends install -y \
   git build-essential pkg-config libcap-dev
 RUN git config --global http.sslVerify false
-RUN git clone --depth 1 --branch v2.0 https://github.com/ioi/isolate.git /usr/src/isolate
+RUN git clone --depth 1 --branch v1.8.1 https://github.com/ioi/isolate.git /usr/src/isolate
 WORKDIR /usr/src/isolate
 RUN make isolate
 

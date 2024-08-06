@@ -48,9 +48,8 @@ impl Sandbox for Isolate {
             true => Command::new("isolate")
                 .arg(format!("--box-id={}", self.box_id))
                 .arg(format!("--processes={}", 128))
-                // TODO: add these. 왜인지 이걸 주면 CI에서 Java 테스트가 터지는데 확인해야 한다.
-                // .arg(format!("--time={}", self.time_limit))
-                // .arg(format!("--mem={}", self.memory_limit))
+                .arg(format!("--time={}", self.time_limit))
+                .arg(format!("--mem={}", self.memory_limit))
                 .arg("--run")
                 .arg(command.binary)
                 .args(&command.args)
