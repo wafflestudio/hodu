@@ -21,6 +21,10 @@ body:json {
   }
 }
 
+assert {
+  res.status: eq 200
+}
+
 tests {
   test("should return non-zero number", function() {
     const result = res.body.stdout;

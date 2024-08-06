@@ -1,5 +1,6 @@
 use actix_web::{dev::HttpServiceFactory, web};
 
+mod error;
 mod judge;
 mod ping;
 

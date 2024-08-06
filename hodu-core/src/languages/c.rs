@@ -1,7 +1,7 @@
 use super::{ExecutionCommand, ExecutionParams, ExecutionResult};
-use crate::sandbox::isolate::execute_isolate;
+use crate::{error::HoduCoreError, sandbox::isolate::execute_isolate};
 
-pub async fn run_c_code(code: &str) -> ExecutionResult {
+pub async fn run_c_code(code: &str) -> Result<ExecutionResult, HoduCoreError> {
     execute_isolate(ExecutionParams {
         code: code.to_string(),
         filename: "./main.c".to_string(),
@@ -21,4 +21,5 @@ pub async fn run_c_code(code: &str) -> ExecutionResult {
         },
     })
     .await
+    .map_err(HoduCoreError::IsolateError)
 }
