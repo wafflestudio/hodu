@@ -25,8 +25,8 @@ async fn submit_code(
         code: &submission.code,
         expected_stdout: "*\n",
         stdin: "3",
-        memory_limit: 4096000,
-        time_limit: 10,
+        memory_limit: 256000,
+        time_limit: 1,
     })
     .await;
 

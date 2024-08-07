@@ -1,4 +1,5 @@
 pub mod isolate;
+pub mod linux_user;
 
 pub struct SandboxCommand<'a> {
     pub binary: &'a str,

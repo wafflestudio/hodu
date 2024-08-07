@@ -1,5 +1,5 @@
 meta {
-  name: [c] stars
+  name: [c] increment
   type: http
   seq: 1
 }
@@ -24,6 +24,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.stdout: eq "4"
-  res.body.stderr: eq 
+  res.body.stderr: eq
   res.body.status: eq wrong
 }
