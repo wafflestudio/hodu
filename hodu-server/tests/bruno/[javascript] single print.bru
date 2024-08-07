@@ -20,6 +20,7 @@ body:json {
     "code": "console.log('Hello');",
     "stdin": "",
     "expected_stdout": "Hello\n",
+    "memory_limit": 2048000,
     "fields": ["*"]
   }
 }
@@ -27,4 +28,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.fields.stdout: eq Hello\n
+  res.body.fields.stderr: eq
+  res.body.status: eq correct
 }

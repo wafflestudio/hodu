@@ -26,6 +26,8 @@ body:json {
 
 assert {
   res.status: eq 200
+  res.body.fields.stderr: eq
+  res.body.status: eq wrong
 }
 
 tests {

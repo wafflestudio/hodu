@@ -27,4 +27,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.fields.stdout: eq *\n**\n***\n****\n*****\n
+  res.body.fields.stderr: eq
+  res.body.status: eq correct
 }

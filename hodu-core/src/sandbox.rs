@@ -17,9 +17,18 @@ pub struct SandboxSpecification {
     pub time_limit: u32,
 }
 
+pub enum SandboxExecuteOptions<'a> {
+    Sandboxed { stdin: &'a str },
+    Unsandboxed,
+}
+
 pub trait Sandbox {
     async fn create(environment: SandboxSpecification) -> Self;
     async fn add_file(&self, filename: &str, content: &str);
-    async fn execute(&self, command: SandboxCommand, sandboxed: bool) -> SandboxResult;
+    async fn execute(
+        &self,
+        command: &SandboxCommand,
+        options: &SandboxExecuteOptions,
+    ) -> SandboxResult;
     async fn destroy(&self);
 }

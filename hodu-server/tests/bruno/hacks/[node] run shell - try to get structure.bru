@@ -19,7 +19,8 @@ body:json {
     "language": "javascript",
     "code": "import { exec } from 'child_process'; const execa = (cmd) => new Promise((res) => exec(cmd, (err, stdout, stderr) => res((err ? stderr : stdout).trim()))); const pwd = await execa('pwd'); console.log(pwd);",
     "stdin": "",
-    "expected_stdout": "/box\n",
+    "expected_stdout": "",
+    "memory_limit": 2048000,
     "fields": ["*"]
   }
 }
@@ -27,4 +28,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.fields.stdout: eq /box\n
+  res.body.fields.stderr: eq
+  res.body.status: eq wrong
 }
