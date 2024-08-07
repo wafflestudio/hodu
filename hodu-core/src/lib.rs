@@ -33,6 +33,7 @@ pub struct MarkResult {
     pub time: f64,
     pub stdout: String,
     pub stderr: String,
+    pub memory: u32,
 }
 
 pub enum MarkResultStatus {
@@ -81,6 +82,10 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
         time: match &execute_result {
             ExecutionResult::Success(result) => result.time,
             _ => 0.0,
+        },
+        memory: match &execute_result {
+            ExecutionResult::Success(result) => result.memory,
+            _ => 0,
         },
         stdout: match &execute_result {
             ExecutionResult::Success(result) => result.stdout.clone(),

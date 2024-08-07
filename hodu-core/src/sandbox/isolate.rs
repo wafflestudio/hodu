@@ -1,5 +1,4 @@
 use rand::Rng;
-use regex::Regex;
 use std::path::PathBuf;
 use tokio::process::Command;
 
@@ -48,19 +47,19 @@ impl Sandbox for Isolate {
         command: &SandboxCommand<'_>,
         options: &SandboxExecuteOptions<'_>,
     ) -> SandboxResult {
-        let run_output = match options {
+        let (output, time, memory) = match options {
             SandboxExecuteOptions::Sandboxed { stdin } => {
-                std::fs::write(
-                    format!("{}/stdin.txt", self.path.to_str().unwrap().trim()),
-                    stdin,
-                )
-                .expect("Failed to write file");
+                let home_dir = self.path.to_str().unwrap().trim();
+
+                std::fs::write(format!("{}/stdin.txt", home_dir), stdin)
+                    .expect("Failed to write file");
 
                 let result = Command::new("isolate")
                     .arg(format!("--box-id={}", self.box_id))
                     .arg(format!("--processes={}", 128))
                     .arg(format!("--time={}", self.time_limit))
                     .arg(format!("--mem={}", self.memory_limit))
+                    .arg(format!("--meta={}/meta.txt", home_dir))
                     .arg("--stdin=stdin.txt")
                     .arg("--run")
                     .arg(command.binary)
@@ -69,42 +68,56 @@ impl Sandbox for Isolate {
                     .await
                     .expect("Failed to execute");
 
-                std::fs::remove_file(format!("{}/stdin.txt", self.path.to_str().unwrap().trim()))
+                let meta_content = std::fs::read_to_string(format!("{}/meta.txt", home_dir))
+                    .expect("Failed to read file");
+
+                let time = meta_content
+                    .lines()
+                    .find(|line| line.starts_with("time-wall:"))
+                    .and_then(|line| line.split(':').nth(1))
+                    .map(|value| value.trim().parse::<f64>())
+                    .unwrap_or(Ok(0.0))
+                    .expect("Failed to parse time");
+
+                let memory = meta_content
+                    .lines()
+                    .find(|line| line.starts_with("max-rss:"))
+                    .and_then(|line| line.split(':').nth(1))
+                    .map(|value| value.trim().parse::<u32>())
+                    .unwrap_or(Ok(0))
+                    .expect("Failed to parse memory");
+
+                std::fs::remove_file(format!("{}/stdin.txt", home_dir))
+                    .expect("Failed to remove file");
+                std::fs::remove_file(format!("{}/meta.txt", home_dir))
                     .expect("Failed to remove file");
 
-                result
+                (result, time, memory)
             }
-            SandboxExecuteOptions::Unsandboxed => Command::new(command.binary)
-                .args(&command.args)
-                .current_dir(&self.path)
-                .output()
-                .await
-                .expect("Failed to execute"),
+            SandboxExecuteOptions::Unsandboxed => (
+                Command::new(command.binary)
+                    .args(&command.args)
+                    .current_dir(&self.path)
+                    .output()
+                    .await
+                    .expect("Failed to execute"),
+                0.0,
+                0,
+            ),
         };
 
         SandboxResult {
-            stdout: match run_output.status.success() {
-                true => String::from_utf8(run_output.stdout.clone()).expect("Invalid output"),
+            stdout: match output.status.success() {
+                true => String::from_utf8(output.stdout.clone()).expect("Invalid output"),
                 false => String::new(),
             },
-            stderr: match run_output.status.success() {
+            stderr: match output.status.success() {
                 true => String::new(),
-                false => String::from_utf8(run_output.stderr.clone()).expect("Invalid output"),
+                false => String::from_utf8(output.stderr.clone()).expect("Invalid output"),
             },
-            success: run_output.status.success(),
-            time: match run_output.status.success() {
-                true => {
-                    let re = Regex::new(r"\((\d+\.\d+) sec real").unwrap();
-                    if let Some(caps) =
-                        re.captures(std::str::from_utf8(&run_output.stderr).expect("failed"))
-                    {
-                        caps[1].parse().unwrap_or(0.0)
-                    } else {
-                        0.0
-                    }
-                }
-                false => 0.0,
-            },
+            success: output.status.success(),
+            time,
+            memory,
         }
     }
 
