@@ -9,7 +9,7 @@ use languages::{
     c::CExecutor, cpp::CppExecutor, java::JavaExecutor, javascript::JavaScriptExecutor,
     python::PythonExecutor, ExecutionResult, LanguageExecutor,
 };
-use sandbox::{isolate::Isolate, Sandbox, SandboxSpecification};
+use sandbox::{isolate::IsolateSandbox, ulimit::UlimitSandbox, Sandbox, SandboxSpecification};
 
 pub enum Language {
     C,
@@ -45,7 +45,7 @@ pub enum MarkResultStatus {
 }
 
 pub async fn mark(params: MarkParams<'_>) -> MarkResult {
-    let sandbox = Isolate::create(SandboxSpecification {
+    let sandbox = UlimitSandbox::create(SandboxSpecification {
         memory_limit: params.memory_limit,
         time_limit: params.time_limit,
     })
