@@ -24,4 +24,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.stdout: eq /box\n
+  res.body.stderr: eq
+  res.body.status: eq wrong
 }

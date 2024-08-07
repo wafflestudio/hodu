@@ -3,7 +3,7 @@ use regex::Regex;
 use std::path::PathBuf;
 use tokio::process::Command;
 
-use super::{Sandbox, SandboxCommand, SandboxResult, SandboxSpecification};
+use super::{Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResult, SandboxSpecification};
 
 pub struct Isolate {
     box_id: i32,
@@ -43,21 +43,38 @@ impl Sandbox for Isolate {
         std::fs::write(source_path, content).expect("Failed to write file");
     }
 
-    async fn execute(&self, command: SandboxCommand<'_>, sandboxed: bool) -> SandboxResult {
-        let run_output = match sandboxed {
-            true => Command::new("isolate")
-                .arg(format!("--box-id={}", self.box_id))
-                .arg(format!("--processes={}", 128))
-                // TODO: add these. 왜인지 이걸 주면 CI에서 Java 테스트가 터지는데 확인해야 한다.
-                // .arg(format!("--time={}", self.time_limit))
-                // .arg(format!("--mem={}", self.memory_limit))
-                .arg("--run")
-                .arg(command.binary)
-                .args(&command.args)
-                .output()
-                .await
-                .expect("Failed to execute"),
-            false => Command::new(command.binary)
+    async fn execute(
+        &self,
+        command: &SandboxCommand<'_>,
+        options: &SandboxExecuteOptions<'_>,
+    ) -> SandboxResult {
+        let run_output = match options {
+            SandboxExecuteOptions::Sandboxed { stdin } => {
+                std::fs::write(
+                    format!("{}/stdin.txt", self.path.to_str().unwrap().trim()),
+                    stdin,
+                )
+                .expect("Failed to write file");
+
+                let result = Command::new("isolate")
+                    .arg(format!("--box-id={}", self.box_id))
+                    .arg(format!("--processes={}", 128))
+                    .arg(format!("--time={}", self.time_limit))
+                    .arg(format!("--mem={}", self.memory_limit))
+                    .arg("--stdin=stdin.txt")
+                    .arg("--run")
+                    .arg(command.binary)
+                    .args(&command.args)
+                    .output()
+                    .await
+                    .expect("Failed to execute");
+
+                std::fs::remove_file(format!("{}/stdin.txt", self.path.to_str().unwrap().trim()))
+                    .expect("Failed to remove file");
+
+                result
+            }
+            SandboxExecuteOptions::Unsandboxed => Command::new(command.binary)
                 .args(&command.args)
                 .current_dir(&self.path)
                 .output()

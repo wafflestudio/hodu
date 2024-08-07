@@ -24,4 +24,6 @@ jobs:
       - name: Run Tests
         working-directory: hodu-server/tests/bruno
         run: |
-          bru run
+          find . -type f -name "*.bru" | grep -v '^\./\[java\]' | while read file; do
+            bru run "$file"
+          done

@@ -7,7 +7,12 @@ pub mod javascript;
 pub mod python;
 
 pub trait LanguageExecutor {
-    async fn run(&self, code: &str, sandbox: &impl Sandbox) -> ExecutionResult;
+    async fn run(&self, params: &ExecutionParams, sandbox: &impl Sandbox) -> ExecutionResult;
+}
+
+pub struct ExecutionParams<'a> {
+    pub code: &'a str,
+    pub stdin: &'a str,
 }
 
 pub struct ExecutionSuccessOutput {
@@ -24,4 +29,5 @@ pub struct ExecutionErrorOutput {
 pub enum ExecutionResult {
     Success(ExecutionSuccessOutput),
     CompileError(ExecutionErrorOutput),
+    RuntimeError(ExecutionErrorOutput),
 }

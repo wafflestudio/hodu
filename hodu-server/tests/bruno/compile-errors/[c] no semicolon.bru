@@ -24,4 +24,6 @@ body:json {
 assert {
   res.status: eq 200
   res.body.stdout: eq ""
+  res.body.stderr: neq 
+  res.body.status: eq compile_error
 }

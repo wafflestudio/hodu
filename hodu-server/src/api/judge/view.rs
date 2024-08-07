@@ -23,8 +23,8 @@ async fn submit_code(
             Language::Python => &hodu_core::Language::Python,
         },
         code: &submission.code,
-        expected_stdout: "",
-        stdin: "",
+        expected_stdout: "*\n",
+        stdin: "3",
         memory_limit: 4096000,
         time_limit: 10,
     })
