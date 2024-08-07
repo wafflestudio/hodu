@@ -25,8 +25,8 @@ RUN make isolate
 #
 FROM debian:12.6-slim AS runner
 
-# install language specific tools
 RUN apt-get update && apt-get --no-install-recommends install -y \
+  time \
   # language: c
   gcc libc6-dev \
   # language: c++

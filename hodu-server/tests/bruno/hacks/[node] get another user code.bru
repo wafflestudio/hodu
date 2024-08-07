@@ -1,0 +1,42 @@
+meta {
+  name: [node] get another user code
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://127.0.0.1:8080/api/v1/submit
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "language": "javascript",
+    "code": "import { exec } from 'child_process'; const execa = (cmd) => new Promise((res) => exec(cmd, (err, stdout, stderr) => res((err ? stderr : stdout).trim()))); const currentUser = (await execa('pwd')).split('/').at(-1); const users = (await execa('ls ..')).split('\\n').map(a => a.trim()); const anotherUser = users.filter(u=>u!==currentUser).at(0); const file = (await execa(`cat ../${anotherUser}/main.c`)); console.log(file);"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.stdout: eq /box\n
+  res.body.stderr: eq
+  res.body.status: eq wrong
+}
+
+script:pre-request {
+  fetch('http://127.0.0.1:8080/api/v1/submit', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      language: 'c',
+      code: 'hihi',
+    })
+  })
+}

@@ -1,0 +1,29 @@
+meta {
+  name: [node] exceed time limit
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://127.0.0.1:8080/api/v1/submit
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "language": "javascript",
+    "code": "setTimeout(() => console.log('*'), 1200)"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.stdout: eq
+  res.body.stderr: eq
+  res.body.status: eq time_limit_exceeded
+}
