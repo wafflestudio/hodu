@@ -17,11 +17,14 @@ headers {
 body:json {
   {
     "language": "javascript",
-    "code": "console.log('Hello');"
+    "code": "console.log('Hello');",
+    "stdin": "",
+    "expected_stdout": "Hello\n",
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stdout: eq Hello\n
+  res.body.fields.stdout: eq Hello\n
 }

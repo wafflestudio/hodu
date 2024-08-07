@@ -17,11 +17,14 @@ headers {
 body:json {
   {
     "language": "javascript",
-    "code": "import { exec } from 'child_process'; const execa = (cmd) => new Promise((res) => exec(cmd, (err, stdout, stderr) => res((err ? stderr : stdout).trim()))); const pwd = await execa('pwd'); console.log(pwd);"
+    "code": "import { exec } from 'child_process'; const execa = (cmd) => new Promise((res) => exec(cmd, (err, stdout, stderr) => res((err ? stderr : stdout).trim()))); const pwd = await execa('pwd'); console.log(pwd);",
+    "stdin": "",
+    "expected_stdout": "/box\n",
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stdout: eq /box\n
+  res.body.fields.stdout: eq /box\n
 }
