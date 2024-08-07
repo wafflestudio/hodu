@@ -55,12 +55,7 @@ impl Sandbox for UlimitSandbox {
             .await
             .expect("Failed to create home directory");
 
-        Command::new("sh")
-            .arg("-c")
-            .arg(format!("echo '{}' > {}", content, source_path))
-            .output()
-            .await
-            .expect("Failed to write file");
+        std::fs::write(source_path, content).expect("Failed to write file");
     }
 
     async fn execute(&self, command: SandboxCommand<'_>, sandboxed: bool) -> SandboxResult {
