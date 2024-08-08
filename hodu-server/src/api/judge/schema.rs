@@ -87,7 +87,7 @@ impl MarkResponse {
             fields: if fields.contains(&Field::WildCard) {
                 MarkResponseFields {
                     time: Some(result.time),
-                    memory: None,
+                    memory: Some(result.memory),
                     stdout: Some(result.stdout.clone()),
                     stderr: Some(result.stderr.clone()),
                 }
@@ -98,7 +98,11 @@ impl MarkResponse {
                     } else {
                         None
                     },
-                    memory: None,
+                    memory: if fields.contains(&Field::Memory) {
+                        Some(result.memory)
+                    } else {
+                        None
+                    },
                     stdout: if fields.contains(&Field::Stdout) {
                         Some(result.stdout.clone())
                     } else {

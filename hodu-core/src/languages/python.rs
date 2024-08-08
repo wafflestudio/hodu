@@ -39,6 +39,7 @@ impl LanguageExecutor for PythonExecutor {
             stdout: execute_result.stdout,
             stderr: execute_result.stderr,
             time: execute_result.time,
+            memory: execute_result.memory,
         })
     }
 }

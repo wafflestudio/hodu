@@ -17,6 +17,7 @@ pub struct ExecutionParams<'a> {
 
 pub struct ExecutionSuccessOutput {
     pub time: f64,
+    pub memory: u32,
     pub stdout: String,
     pub stderr: String,
 }
