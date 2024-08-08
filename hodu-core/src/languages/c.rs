@@ -1,4 +1,4 @@
-use crate::sandbox::{Sandbox, SandboxCommand, SandboxExecuteOptions};
+use crate::sandbox::{Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResultStatus};
 
 use super::{
     ExecutionErrorOutput, ExecutionParams, ExecutionResult, ExecutionSuccessOutput,
@@ -21,7 +21,7 @@ impl LanguageExecutor for CExecutor {
             )
             .await;
 
-        if !compile_result.success {
+        if compile_result.status != SandboxResultStatus::Success {
             return ExecutionResult::CompileError(ExecutionErrorOutput {
                 stdout: compile_result.stdout,
                 stderr: compile_result.stderr,
@@ -40,18 +40,22 @@ impl LanguageExecutor for CExecutor {
             )
             .await;
 
-        if !execute_result.success {
-            return ExecutionResult::RuntimeError(ExecutionErrorOutput {
+        match execute_result.status {
+            SandboxResultStatus::TimeLimitExceeded => ExecutionResult::TimeLimitExceeded,
+            SandboxResultStatus::MemoryLimitExceeded => ExecutionResult::MemoryLimitExceeded,
+            SandboxResultStatus::RuntimeError => {
+                ExecutionResult::RuntimeError(ExecutionErrorOutput {
+                    stdout: execute_result.stdout,
+                    stderr: execute_result.stderr,
+                })
+            }
+            SandboxResultStatus::InternalError => ExecutionResult::InternalError,
+            SandboxResultStatus::Success => ExecutionResult::Success(ExecutionSuccessOutput {
                 stdout: execute_result.stdout,
                 stderr: execute_result.stderr,
-            });
+                time: execute_result.time,
+                memory: execute_result.memory,
+            }),
         }
-
-        ExecutionResult::Success(ExecutionSuccessOutput {
-            stdout: execute_result.stdout,
-            stderr: execute_result.stderr,
-            time: execute_result.time,
-            memory: execute_result.memory,
-        })
     }
 }

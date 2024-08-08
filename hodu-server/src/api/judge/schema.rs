@@ -83,6 +83,7 @@ impl MarkResponse {
                 hodu_core::MarkResultStatus::MemoryLimitExceeded => {
                     "memory_limit_exceeded".to_string()
                 }
+                hodu_core::MarkResultStatus::InternalError => "internal_error".to_string(),
             },
             fields: if fields.contains(&Field::WildCard) {
                 MarkResponseFields {

@@ -1,5 +1,5 @@
 meta {
-  name: [c] no semicolon
+  name: [javascript] null pointer exception
   type: http
   seq: 2
 }
@@ -12,8 +12,8 @@ post {
 
 body:json {
   {
-    "language": "c",
-    "code": "#include <stdio.h>\nint main() { printf(\"Hello World\") }",
+    "language": "javascript",
+    "code": "const a = null; console.log(a.a);",
     "stdin": "",
     "expected_stdout": "",
     "fields": ["*"]
@@ -24,5 +24,5 @@ assert {
   res.status: eq 200
   res.body.fields.stdout: eq 
   res.body.fields.stderr: neq
-  res.body.status: eq compile_error
+  res.body.status: eq runtime_error
 }

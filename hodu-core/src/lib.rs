@@ -43,6 +43,7 @@ pub enum MarkResultStatus {
     RuntimeError,
     TimeLimitExceeded,
     MemoryLimitExceeded,
+    InternalError,
 }
 
 pub async fn mark(params: MarkParams<'_>) -> MarkResult {
@@ -78,6 +79,9 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
             }
             ExecutionResult::CompileError(_) => MarkResultStatus::CompileError,
             ExecutionResult::RuntimeError(_) => MarkResultStatus::RuntimeError,
+            ExecutionResult::TimeLimitExceeded => MarkResultStatus::TimeLimitExceeded,
+            ExecutionResult::MemoryLimitExceeded => MarkResultStatus::MemoryLimitExceeded,
+            ExecutionResult::InternalError => MarkResultStatus::InternalError,
         },
         time: match &execute_result {
             ExecutionResult::Success(result) => result.time,
@@ -91,11 +95,17 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
             ExecutionResult::Success(result) => result.stdout.clone(),
             ExecutionResult::CompileError(result) => result.stdout.clone(),
             ExecutionResult::RuntimeError(result) => result.stdout.clone(),
+            ExecutionResult::TimeLimitExceeded => String::new(),
+            ExecutionResult::MemoryLimitExceeded => String::new(),
+            ExecutionResult::InternalError => String::new(),
         },
         stderr: match &execute_result {
             ExecutionResult::Success(result) => result.stderr.clone(),
             ExecutionResult::CompileError(result) => result.stderr.clone(),
             ExecutionResult::RuntimeError(result) => result.stderr.clone(),
+            ExecutionResult::TimeLimitExceeded => String::new(),
+            ExecutionResult::MemoryLimitExceeded => String::new(),
+            ExecutionResult::InternalError => String::new(),
         },
     }
 }

@@ -31,4 +31,7 @@ pub enum ExecutionResult {
     Success(ExecutionSuccessOutput),
     CompileError(ExecutionErrorOutput),
     RuntimeError(ExecutionErrorOutput),
+    MemoryLimitExceeded,
+    TimeLimitExceeded,
+    InternalError,
 }
