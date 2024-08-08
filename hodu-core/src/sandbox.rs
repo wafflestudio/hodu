@@ -10,6 +10,7 @@ pub struct SandboxResult {
     pub stderr: String,
     pub time: f64,
     pub success: bool,
+    pub memory: u32,
 }
 
 pub struct SandboxSpecification {

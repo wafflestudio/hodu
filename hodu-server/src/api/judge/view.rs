@@ -40,6 +40,7 @@ async fn submit_code(
                 hodu_core::MarkResultStatus::MemoryLimitExceeded => "memory_limit_exceeded",
             },
         "time": output.time,
+        "memory": output.memory,
         "stdout": output.stdout,
         "stderr": output.stderr,
     })))
