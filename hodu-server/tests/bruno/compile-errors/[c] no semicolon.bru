@@ -28,5 +28,5 @@ assert {
   res.status: eq 200
   res.body.fields.stdout: eq ""
   res.body.fields.stderr: neq 
-  res.body.status: eq compile_error
+  res.body.status: eq COMPILE_ERROR
 }
