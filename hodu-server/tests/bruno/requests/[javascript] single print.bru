@@ -1,25 +1,22 @@
 meta {
-  name: [python] single print
+  name: [javascript] single print
   type: http
   seq: 4
 }
 
 post {
-  url: http://127.0.0.1:8080/api/v1/submit
+  url: {{baseURL}}/api/v1/submit
   body: json
   auth: none
 }
 
-headers {
-  Content-Type: application/json
-}
-
 body:json {
   {
-    "language": "python",
-    "code": "print(\"Hello\")",
+    "language": "javascript",
+    "code": "console.log('Hello');",
     "stdin": "",
     "expected_stdout": "Hello\n",
+    "memory_limit": 2048000,
     "fields": ["*"]
   }
 }
