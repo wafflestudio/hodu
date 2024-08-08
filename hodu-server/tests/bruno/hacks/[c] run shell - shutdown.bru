@@ -17,19 +17,22 @@ headers {
 body:json {
   {
     "language": "c",
-    "code": "#include <stdlib.h>\n#include <stdio.h>\nint main() { int result = system(\"shutdown\"); printf(\"%d\", result); }"
+    "code": "#include <stdlib.h>\n#include <stdio.h>\nint main() { int result = system(\"shutdown\"); printf(\"%d\", result); }",
+    "stdin": "",
+    "expected_stdout": "",
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stderr: eq
+  res.body.fields.stderr: eq
   res.body.status: eq wrong
 }
 
 tests {
   test("should return non-zero number", function() {
-    const result = res.body.stdout;
+    const result = res.body.fields.stdout;
     const isValid = !isNaN(Number(result)) && Number(result) !== 0;
     expect(isValid).to.equal(true);
   });

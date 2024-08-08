@@ -17,13 +17,17 @@ headers {
 body:json {
   {
     "language": "java",
-    "code": "public class Main { public static void main(String[] args) { System.out.println(\"*\"); } }"
+    "code": "public class Main { public static void main(String[] args) { System.out.println(\"*\"); } }",
+    "stdin": "",
+    "expected_stdout": "*\n",
+    "memory_limit": 4096000,
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stdout: eq *\n
-  res.body.stderr: eq
+  res.body.fields.stdout: eq *\n
+  res.body.fields.stderr: eq
   res.body.status: eq correct
 }

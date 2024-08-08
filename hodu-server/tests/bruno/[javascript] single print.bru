@@ -17,13 +17,17 @@ headers {
 body:json {
   {
     "language": "javascript",
-    "code": "console.log('Hello');"
+    "code": "console.log('Hello');",
+    "stdin": "",
+    "expected_stdout": "Hello\n",
+    "memory_limit": 2048000,
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stdout: eq Hello\n
-  res.body.stderr: eq
-  res.body.status: eq wrong
+  res.body.fields.stdout: eq Hello\n
+  res.body.fields.stderr: eq
+  res.body.status: eq correct
 }

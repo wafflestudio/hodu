@@ -17,13 +17,16 @@ headers {
 body:json {
   {
     "language": "c",
-    "code": "#include <stdio.h>\nint main() { int input; scanf(\"%d\", &input); printf(\"%d\", input + 1); }"
+    "code": "#include <stdio.h>\nint main() { int input; scanf(\"%d\", &input); printf(\"%d\", input + 1); }",
+    "stdin": "3",
+    "expected_stdout": "4",
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stdout: eq "4"
-  res.body.stderr: eq 
-  res.body.status: eq wrong
+  res.body.fields.stdout: eq "4"
+  res.body.fields.stderr: eq 
+  res.body.status: eq correct
 }

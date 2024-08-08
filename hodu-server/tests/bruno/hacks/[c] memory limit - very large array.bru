@@ -17,11 +17,14 @@ headers {
 body:json {
   {
     "language": "c",
-    "code": "#include <stdlib.h>\nint result[100000][100000];\nint main() { }"
+    "code": "#include <stdlib.h>\nint result[10000000][10000000];\nint main() { }",
+    "stdin": "",
+    "expected_stdout": "",
+    "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.stderr: eq Caught fatal signal 11\n
+  res.body.fields.stderr: eq Caught fatal signal 11\n
 }

@@ -1,7 +1,6 @@
 use actix_web::{dev::HttpServiceFactory, web};
 
-mod error;
-mod judge;
+pub mod judge;
 mod ping;
 
 pub fn v1_router() -> impl HttpServiceFactory {
