@@ -1,5 +1,9 @@
+use std::panic::AssertUnwindSafe;
+
 use actix_web::{post, web, Responder};
 use hodu_core::{mark, MarkParams};
+
+use futures::FutureExt;
 
 use crate::api::judge::{
     error::JudgeError,
@@ -17,15 +21,17 @@ async fn submit_code(
         submission.language
     );
 
-    let output = mark(MarkParams {
+    let output = AssertUnwindSafe(mark(MarkParams {
         language: &submission.language.clone().into(),
         code: &submission.code,
         expected_stdout: &submission.expected_stdout,
         stdin: &submission.stdin,
         memory_limit: submission.memory_limit,
         time_limit: submission.time_limit,
-    })
-    .await;
+    }))
+    .catch_unwind()
+    .await
+    .map_err(|_| JudgeError::HoduCoreError)?;
 
     Ok(web::Json(
         serde_json::to_value(MarkResponse::new(&output, &submission.fields)).unwrap(),
