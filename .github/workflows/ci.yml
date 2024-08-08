@@ -11,17 +11,25 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
+      - name: Set Image Name
+        id: image-name
+        run: echo "IMAGE_NAME=hodu:ci-$(openssl rand -hex 8)" >> $GITHUB_ENV
       - name: Build & Run Server
         run: |
-          docker build -t hodu .
-          docker run --privileged -dp 8080:8080 hodu
-      - name: Install Test Cli
-        run: |
-          npm install -g @usebruno/cli
+          sudo docker build -t $IMAGE_NAME .
+          sudo docker run --privileged -dp 8081:8080 $IMAGE_NAME
       - name: Run Tests
         working-directory: hodu-server/tests/bruno
         run: |
+          source ~/.bashrc
           bru run --tests-only --env local
+      - name: Cleanup Docker Image
+        if: always()
+        run: |
+          sudo docker stop $(sudo docker ps -q --filter ancestor=$IMAGE_NAME)
+          sudo docker rm $(sudo docker ps -a -q --filter ancestor=$IMAGE_NAME)
+          sudo docker rmi $IMAGE_NAME
+          sudo docker system prune -af
