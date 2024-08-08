@@ -42,8 +42,8 @@ docker run --privileged -dp 8080:8080 hodu
 서버가 실행되고 있어야 합니다.
 
 ```bash
-cd tests/bruno
-bru run
+cd hodu-server/tests/bruno
+bru run --env local
 ```
 
 <br/><br/>
