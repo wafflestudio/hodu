@@ -72,21 +72,21 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
         Result::Ok(result) => MarkResult {
             status: match &result {
                 ExecutionResult::Success(result) => {
-                    let trimed_stdout = result
+                    let trimed_stdout: Vec<&str> = result
                         .stdout
-                        .trim_end()
-                        .split("\n")
-                        .map(|line| line.trim())
-                        .collect::<Vec<&str>>()
-                        .join("\n");
-                    let trimed_expected_stdout = params
+                        .trim()
+                        .lines()
+                        .map(|line| line.trim_end())
+                        .collect();
+                    let trimed_expected_stdout: Vec<&str> = params
                         .expected_stdout
-                        .trim_end()
-                        .split("\n")
-                        .map(|line| line.trim())
-                        .collect::<Vec<&str>>()
-                        .join("\n");
-                    if trimed_stdout.eq(&trimed_expected_stdout) {
+                        .trim()
+                        .lines()
+                        .map(|line| line.trim_end())
+                        .collect();
+                    if trimed_stdout.len() == trimed_expected_stdout.len()
+                        && trimed_stdout == trimed_expected_stdout
+                    {
                         MarkResultStatus::Correct
                     } else {
                         MarkResultStatus::Wrong
