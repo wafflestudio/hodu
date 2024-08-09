@@ -10,6 +10,9 @@ use super::{
 
 pub struct CppExecutor {}
 
+const DEFAULT_COMPILE_OPTIONS: [&str; 3] = ["-O2", "-static", "-std=gnu17"]; // 덮어씌울 수 있다.
+const DEFAULT_COMPILE_ARGS: [&str; 3] = ["-o", "./main", "./main.cpp"]; // 덮어씌울 수 없다.
+
 impl LanguageExecutor for CppExecutor {
     async fn run(
         &self,
@@ -18,11 +21,20 @@ impl LanguageExecutor for CppExecutor {
     ) -> Result<ExecutionResult, CoreError> {
         sandbox.add_file("./main.cpp", params.code).await;
 
+        let mut compile_args = vec![];
+        compile_args.extend(
+            params
+                .compile_options
+                .clone()
+                .unwrap_or(DEFAULT_COMPILE_OPTIONS.to_vec()),
+        );
+        compile_args.extend(&DEFAULT_COMPILE_ARGS.to_vec());
+
         let compile_result = sandbox
             .execute(
                 &SandboxCommand {
                     binary: "g++",
-                    args: vec!["-o", "./main", "./main.cpp"],
+                    args: compile_args,
                 },
                 &SandboxExecuteOptions::Unsandboxed,
             )

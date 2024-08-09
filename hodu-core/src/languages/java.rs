@@ -11,6 +11,17 @@ use super::{
 
 pub struct JavaExecutor {}
 
+const DEFAULT_COMPILE_OPTIONS: [&str; 7] = [
+    "--release",
+    "17",
+    "-encoding",
+    "UTF-8",
+    "-J-Xms1024m",
+    "-J-Xmx1920m",
+    "-J-Xss512m",
+]; // 덮어씌울 수 있다.
+const DEFAULT_COMPILE_ARGS: [&str; 1] = ["./Main.java"]; // 덮어씌울 수 없다.
+
 impl LanguageExecutor for JavaExecutor {
     async fn run(
         &self,
@@ -21,11 +32,20 @@ impl LanguageExecutor for JavaExecutor {
 
         let java = get_binary_path("java").await;
 
+        let mut compile_args = vec![];
+        compile_args.extend(
+            params
+                .compile_options
+                .clone()
+                .unwrap_or(DEFAULT_COMPILE_OPTIONS.to_vec()),
+        );
+        compile_args.extend(&DEFAULT_COMPILE_ARGS.to_vec());
+
         let compile_result = sandbox
             .execute(
                 &SandboxCommand {
                     binary: "javac",
-                    args: vec!["./Main.java"],
+                    args: compile_args,
                 },
                 &SandboxExecuteOptions::Unsandboxed,
             )

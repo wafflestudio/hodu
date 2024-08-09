@@ -7,6 +7,7 @@ pub struct CodeSubmission {
     pub id: String,
     pub language: Language,
     pub code: String,
+    pub compile_options: Option<Vec<String>>,
     pub stdin: String,
     pub expected_stdout: String,
     #[serde(default = "default_time_limit")]

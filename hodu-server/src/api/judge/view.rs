@@ -20,7 +20,7 @@ async fn submit_code(
     submission: Result<web::Json<CodeSubmission>, actix_web::Error>,
     counter: web::Data<MarkCounter>,
 ) -> Result<impl Responder, JudgeError> {
-    let submission = submission.map_err(|e| JudgeError::PayloadParseError(e))?;
+    let submission = submission.map_err(JudgeError::PayloadParseError)?;
     tracing::info!(
         "Received code submission: {} / {:?}",
         submission.id,
@@ -38,6 +38,10 @@ async fn submit_code(
     let output = AssertUnwindSafe(mark(MarkParams {
         language: &submission.language.clone().into(),
         code: &submission.code,
+        compile_options: &submission
+            .compile_options
+            .as_ref()
+            .map(|options| options.iter().map(String::as_str).collect()),
         expected_stdout: &submission.expected_stdout,
         stdin: &submission.stdin,
         memory_limit: submission.memory_limit,
