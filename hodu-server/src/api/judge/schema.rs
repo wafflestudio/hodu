@@ -58,6 +58,19 @@ impl Into<hodu_core::Language> for Language {
 }
 
 #[derive(Serialize)]
+#[serde(remote = "hodu_core::MarkResultStatus")]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+enum MarkResponseStatus {
+    Correct,
+    Wrong,
+    CompileError,
+    RuntimeError,
+    TimeLimitExceeded,
+    MemoryLimitExceeded,
+    InternalError,
+}
+
+#[derive(Serialize)]
 struct MarkResponseFields {
     time: Option<f64>,
     memory: Option<u32>,
@@ -65,57 +78,54 @@ struct MarkResponseFields {
     stderr: Option<String>,
 }
 
+impl MarkResponseFields {
+    pub fn from(result: &hodu_core::MarkResult, fields: &Vec<Field>) -> Self {
+        if fields.contains(&Field::WildCard) {
+            return MarkResponseFields {
+                time: Some(result.time),
+                memory: Some(result.memory),
+                stdout: Some(result.stdout.clone()),
+                stderr: Some(result.stderr.clone()),
+            };
+        } else {
+            MarkResponseFields {
+                time: if fields.contains(&Field::Time) {
+                    Some(result.time)
+                } else {
+                    None
+                },
+                memory: if fields.contains(&Field::Memory) {
+                    Some(result.memory)
+                } else {
+                    None
+                },
+                stdout: if fields.contains(&Field::Stdout) {
+                    Some(result.stdout.clone())
+                } else {
+                    None
+                },
+                stderr: if fields.contains(&Field::Stderr) {
+                    Some(result.stderr.clone())
+                } else {
+                    None
+                },
+            }
+        }
+    }
+}
+
 #[derive(Serialize)]
-pub struct MarkResponse {
-    status: String,
+pub struct MarkResponse<'a> {
+    #[serde(with = "MarkResponseStatus")]
+    status: &'a hodu_core::MarkResultStatus,
     fields: MarkResponseFields,
 }
 
-impl MarkResponse {
-    pub fn new(result: &hodu_core::MarkResult, fields: &Vec<Field>) -> Self {
+impl<'a> MarkResponse<'a> {
+    pub fn new(result: &'a hodu_core::MarkResult, fields: &Vec<Field>) -> Self {
         MarkResponse {
-            status: match result.status {
-                hodu_core::MarkResultStatus::Correct => "correct".to_string(),
-                hodu_core::MarkResultStatus::Wrong => "wrong".to_string(),
-                hodu_core::MarkResultStatus::CompileError => "compile_error".to_string(),
-                hodu_core::MarkResultStatus::RuntimeError => "runtime_error".to_string(),
-                hodu_core::MarkResultStatus::TimeLimitExceeded => "time_limit_exceeded".to_string(),
-                hodu_core::MarkResultStatus::MemoryLimitExceeded => {
-                    "memory_limit_exceeded".to_string()
-                }
-                hodu_core::MarkResultStatus::InternalError => "internal_error".to_string(),
-            },
-            fields: if fields.contains(&Field::WildCard) {
-                MarkResponseFields {
-                    time: Some(result.time),
-                    memory: Some(result.memory),
-                    stdout: Some(result.stdout.clone()),
-                    stderr: Some(result.stderr.clone()),
-                }
-            } else {
-                MarkResponseFields {
-                    time: if fields.contains(&Field::Time) {
-                        Some(result.time)
-                    } else {
-                        None
-                    },
-                    memory: if fields.contains(&Field::Memory) {
-                        Some(result.memory)
-                    } else {
-                        None
-                    },
-                    stdout: if fields.contains(&Field::Stdout) {
-                        Some(result.stdout.clone())
-                    } else {
-                        None
-                    },
-                    stderr: if fields.contains(&Field::Stderr) {
-                        Some(result.stderr.clone())
-                    } else {
-                        None
-                    },
-                }
-            },
+            status: &result.status,
+            fields: MarkResponseFields::from(result, fields),
         }
     }
 }

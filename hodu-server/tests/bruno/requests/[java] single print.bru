@@ -20,3 +20,10 @@ body:json {
     "fields": ["*"]
   }
 }
+
+assert {
+  res.status: eq 200
+  res.body.fields.stdout: eq *\n
+  res.body.fields.stderr: eq
+  res.body.status: eq CORRECT
+}
