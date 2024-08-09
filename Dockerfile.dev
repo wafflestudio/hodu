@@ -1,6 +1,4 @@
-###################
-# Isolate builder #
-###################
+# Isolate builder
 FROM debian:12.6-slim AS isolate-builder
 
 # install isolate
@@ -11,9 +9,7 @@ RUN git clone --depth 1 --branch v2.0 https://github.com/ioi/isolate.git /usr/sr
 WORKDIR /usr/src/isolate
 RUN make isolate
 
-#############
-# Dev image #
-#############
+# Dev image
 # docker run -it --rm -v $PWD:/usr/src/hodu --privileged -p 8080:8080 hodu-dev
 FROM rust:1.80.0-slim AS runner
 
