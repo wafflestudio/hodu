@@ -17,6 +17,7 @@ pub trait LanguageExecutor {
 pub struct ExecutionParams<'a> {
     pub code: &'a str,
     pub stdin: &'a str,
+    pub compile_options: &'a Option<Vec<&'a str>>,
 }
 
 pub struct ExecutionSuccessOutput {

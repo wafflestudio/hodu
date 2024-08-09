@@ -22,6 +22,7 @@ pub enum Language {
 pub struct MarkParams<'a> {
     pub language: &'a Language,
     pub code: &'a str,
+    pub compile_options: &'a Option<Vec<&'a str>>,
     pub stdin: &'a str,
     pub expected_stdout: &'a str,
     pub time_limit: f64,
@@ -56,6 +57,7 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
     let run_params = languages::ExecutionParams {
         code: params.code,
         stdin: params.stdin,
+        compile_options: params.compile_options,
     };
 
     let execute_result = match params.language {
