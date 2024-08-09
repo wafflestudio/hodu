@@ -67,6 +67,7 @@ enum MarkResponseStatus {
     RuntimeError,
     TimeLimitExceeded,
     MemoryLimitExceeded,
+    InternalError,
 }
 
 #[derive(Serialize)]
