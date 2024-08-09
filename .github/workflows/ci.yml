@@ -21,6 +21,7 @@ jobs:
         run: |
           sudo docker build -t $IMAGE_NAME .
           sudo docker run --privileged -dp 8081:8080 $IMAGE_NAME
+          sudo docker system prune -af
       - name: Run Tests
         working-directory: hodu-server/tests/bruno
         run: |
@@ -32,4 +33,3 @@ jobs:
           sudo docker stop $(sudo docker ps -q --filter ancestor=$IMAGE_NAME)
           sudo docker rm $(sudo docker ps -a -q --filter ancestor=$IMAGE_NAME)
           sudo docker rmi $IMAGE_NAME
-          sudo docker system prune -af
