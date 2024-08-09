@@ -24,7 +24,7 @@ pub enum SandboxResultStatus {
 
 pub struct SandboxSpecification {
     pub memory_limit: u32,
-    pub time_limit: u32,
+    pub time_limit: f64,
 }
 
 pub enum SandboxExecuteOptions<'a> {

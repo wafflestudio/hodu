@@ -24,7 +24,7 @@ pub struct MarkParams<'a> {
     pub code: &'a str,
     pub stdin: &'a str,
     pub expected_stdout: &'a str,
-    pub time_limit: u32,
+    pub time_limit: f64,
     pub memory_limit: u32,
 }
 

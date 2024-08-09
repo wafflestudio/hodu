@@ -11,7 +11,7 @@ pub struct Isolate {
     box_id: i32,
     path: PathBuf,
     memory_limit: u32,
-    time_limit: u32,
+    time_limit: f64,
 }
 
 impl Sandbox for Isolate {
