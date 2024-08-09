@@ -10,7 +10,7 @@ pub struct CodeSubmission {
     pub stdin: String,
     pub expected_stdout: String,
     #[serde(default = "default_time_limit")]
-    pub time_limit: u32,
+    pub time_limit: f64,
     #[serde(default = "default_memory_limit")]
     pub memory_limit: u32,
     #[serde(default)]
@@ -21,8 +21,8 @@ fn default_id() -> String {
     Uuid::new_v4().to_string()
 }
 
-const DEFAULT_TIME_LIMIT: u32 = 10;
-fn default_time_limit() -> u32 {
+const DEFAULT_TIME_LIMIT: f64 = 10.0;
+fn default_time_limit() -> f64 {
     DEFAULT_TIME_LIMIT
 }
 
