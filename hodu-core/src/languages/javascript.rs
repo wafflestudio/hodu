@@ -1,4 +1,5 @@
 use crate::{
+    error::CoreError,
     sandbox::{Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResultStatus},
     utils::get_binary_path::get_binary_path,
 };
@@ -11,7 +12,11 @@ use super::{
 pub struct JavaScriptExecutor {}
 
 impl LanguageExecutor for JavaScriptExecutor {
-    async fn run(&self, params: &ExecutionParams<'_>, sandbox: &impl Sandbox) -> ExecutionResult {
+    async fn run(
+        &self,
+        params: &ExecutionParams<'_>,
+        sandbox: &impl Sandbox,
+    ) -> Result<ExecutionResult, CoreError> {
         sandbox.add_file("./main.mjs", params.code).await;
 
         let node = get_binary_path("node").await;
@@ -26,24 +31,29 @@ impl LanguageExecutor for JavaScriptExecutor {
                     stdin: params.stdin,
                 },
             )
-            .await;
+            .await?;
 
         match execute_result.status {
-            SandboxResultStatus::TimeLimitExceeded => ExecutionResult::TimeLimitExceeded,
-            SandboxResultStatus::MemoryLimitExceeded => ExecutionResult::MemoryLimitExceeded,
+            SandboxResultStatus::TimeLimitExceeded => {
+                Result::Ok(ExecutionResult::TimeLimitExceeded)
+            }
+            SandboxResultStatus::MemoryLimitExceeded => {
+                Result::Ok(ExecutionResult::MemoryLimitExceeded)
+            }
             SandboxResultStatus::RuntimeError => {
-                ExecutionResult::RuntimeError(ExecutionErrorOutput {
+                Result::Ok(ExecutionResult::RuntimeError(ExecutionErrorOutput {
                     stdout: execute_result.stdout,
                     stderr: execute_result.stderr,
-                })
+                }))
             }
-            SandboxResultStatus::InternalError => ExecutionResult::InternalError,
-            SandboxResultStatus::Success => ExecutionResult::Success(ExecutionSuccessOutput {
-                stdout: execute_result.stdout,
-                stderr: execute_result.stderr,
-                time: execute_result.time,
-                memory: execute_result.memory,
-            }),
+            SandboxResultStatus::Success => {
+                Result::Ok(ExecutionResult::Success(ExecutionSuccessOutput {
+                    stdout: execute_result.stdout,
+                    stderr: execute_result.stderr,
+                    time: execute_result.time,
+                    memory: execute_result.memory,
+                }))
+            }
         }
     }
 }

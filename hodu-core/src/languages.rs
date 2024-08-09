@@ -1,4 +1,4 @@
-use crate::sandbox::Sandbox;
+use crate::{error::CoreError, sandbox::Sandbox};
 
 pub mod c;
 pub mod cpp;
@@ -7,7 +7,11 @@ pub mod javascript;
 pub mod python;
 
 pub trait LanguageExecutor {
-    async fn run(&self, params: &ExecutionParams, sandbox: &impl Sandbox) -> ExecutionResult;
+    async fn run(
+        &self,
+        params: &ExecutionParams,
+        sandbox: &impl Sandbox,
+    ) -> Result<ExecutionResult, CoreError>;
 }
 
 pub struct ExecutionParams<'a> {
@@ -33,5 +37,4 @@ pub enum ExecutionResult {
     RuntimeError(ExecutionErrorOutput),
     MemoryLimitExceeded,
     TimeLimitExceeded,
-    InternalError,
 }

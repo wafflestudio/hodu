@@ -2,6 +2,8 @@ use rand::Rng;
 use std::{path::PathBuf, str::FromStr};
 use tokio::process::Command;
 
+use crate::error::CoreError;
+
 use super::{
     Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResult, SandboxResultStatus,
     SandboxSpecification,
@@ -50,8 +52,8 @@ impl Sandbox for Isolate {
         &self,
         command: &SandboxCommand<'_>,
         options: &SandboxExecuteOptions<'_>,
-    ) -> SandboxResult {
-        let (output, time, memory, status) = match options {
+    ) -> Result<SandboxResult, CoreError> {
+        let (output, time, memory, status, is_internal_error) = match options {
             SandboxExecuteOptions::Sandboxed { stdin } => {
                 let home_dir = self.path.to_str().unwrap().trim();
 
@@ -88,6 +90,8 @@ impl Sandbox for Isolate {
                 std::fs::remove_file(format!("{}/meta.txt", home_dir))
                     .expect("Failed to remove file");
 
+                let mut is_internal_error = false;
+
                 let status = if meta_cg_oom_killed == 1 {
                     SandboxResultStatus::MemoryLimitExceeded
                 } else if meta_status == "RE" {
@@ -95,14 +99,15 @@ impl Sandbox for Isolate {
                 } else if meta_status == "TO" {
                     SandboxResultStatus::TimeLimitExceeded
                 } else if meta_status == "SG" || meta_status == "XX" {
-                    SandboxResultStatus::InternalError
+                    is_internal_error = true;
+                    SandboxResultStatus::RuntimeError
                 } else if !result.status.success() {
                     SandboxResultStatus::RuntimeError
                 } else {
                     SandboxResultStatus::Success
                 };
 
-                (result, meta_time, meta_cg_mem, status)
+                (result, meta_time, meta_cg_mem, status, is_internal_error)
             }
             SandboxExecuteOptions::Unsandboxed => {
                 let result = Command::new(command.binary)
@@ -117,11 +122,15 @@ impl Sandbox for Isolate {
                     false => SandboxResultStatus::RuntimeError,
                 };
 
-                (result, 0.0, 0, status)
+                (result, 0.0, 0, status, false)
             }
         };
 
-        SandboxResult {
+        if is_internal_error {
+            return Result::Err(CoreError::InternalError("Isolate Error".to_string()));
+        }
+
+        Result::Ok(SandboxResult {
             stdout: match output.status.success() {
                 true => String::from_utf8(output.stdout.clone()).expect("Invalid output"),
                 false => String::new(),
@@ -133,7 +142,7 @@ impl Sandbox for Isolate {
             status,
             time,
             memory,
-        }
+        })
     }
 
     async fn destroy(&self) {

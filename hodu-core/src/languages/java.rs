@@ -1,4 +1,5 @@
 use crate::{
+    error::CoreError,
     sandbox::{Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResultStatus},
     utils::get_binary_path::get_binary_path,
 };
@@ -11,7 +12,11 @@ use super::{
 pub struct JavaExecutor {}
 
 impl LanguageExecutor for JavaExecutor {
-    async fn run(&self, params: &ExecutionParams<'_>, sandbox: &impl Sandbox) -> ExecutionResult {
+    async fn run(
+        &self,
+        params: &ExecutionParams<'_>,
+        sandbox: &impl Sandbox,
+    ) -> Result<ExecutionResult, CoreError> {
         sandbox.add_file("./Main.java", params.code).await;
 
         let java = get_binary_path("java").await;
@@ -24,13 +29,13 @@ impl LanguageExecutor for JavaExecutor {
                 },
                 &SandboxExecuteOptions::Unsandboxed,
             )
-            .await;
+            .await?;
 
         if compile_result.status != SandboxResultStatus::Success {
-            return ExecutionResult::CompileError(ExecutionErrorOutput {
+            return Result::Ok(ExecutionResult::CompileError(ExecutionErrorOutput {
                 stdout: compile_result.stdout,
                 stderr: compile_result.stderr,
-            });
+            }));
         }
 
         let execute_result = sandbox
@@ -43,24 +48,29 @@ impl LanguageExecutor for JavaExecutor {
                     stdin: params.stdin,
                 },
             )
-            .await;
+            .await?;
 
         match execute_result.status {
-            SandboxResultStatus::TimeLimitExceeded => ExecutionResult::TimeLimitExceeded,
-            SandboxResultStatus::MemoryLimitExceeded => ExecutionResult::MemoryLimitExceeded,
+            SandboxResultStatus::TimeLimitExceeded => {
+                Result::Ok(ExecutionResult::TimeLimitExceeded)
+            }
+            SandboxResultStatus::MemoryLimitExceeded => {
+                Result::Ok(ExecutionResult::MemoryLimitExceeded)
+            }
             SandboxResultStatus::RuntimeError => {
-                ExecutionResult::RuntimeError(ExecutionErrorOutput {
+                Result::Ok(ExecutionResult::RuntimeError(ExecutionErrorOutput {
                     stdout: execute_result.stdout,
                     stderr: execute_result.stderr,
-                })
+                }))
             }
-            SandboxResultStatus::InternalError => ExecutionResult::InternalError,
-            SandboxResultStatus::Success => ExecutionResult::Success(ExecutionSuccessOutput {
-                stdout: execute_result.stdout,
-                stderr: execute_result.stderr,
-                time: execute_result.time,
-                memory: execute_result.memory,
-            }),
+            SandboxResultStatus::Success => {
+                Result::Ok(ExecutionResult::Success(ExecutionSuccessOutput {
+                    stdout: execute_result.stdout,
+                    stderr: execute_result.stderr,
+                    time: execute_result.time,
+                    memory: execute_result.memory,
+                }))
+            }
         }
     }
 }

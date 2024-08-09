@@ -1,2 +1,5 @@
 #[derive(thiserror::Error, Debug)]
-pub enum HoduCoreError {}
+pub enum CoreError {
+    #[error("Internale Error: {0}")]
+    InternalError(String),
+}

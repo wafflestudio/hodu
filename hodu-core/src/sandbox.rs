@@ -1,3 +1,5 @@
+use crate::error::CoreError;
+
 pub mod isolate;
 
 pub struct SandboxCommand<'a> {
@@ -19,7 +21,6 @@ pub enum SandboxResultStatus {
     RuntimeError,
     TimeLimitExceeded,
     MemoryLimitExceeded,
-    InternalError,
 }
 
 pub struct SandboxSpecification {
@@ -39,6 +40,6 @@ pub trait Sandbox {
         &self,
         command: &SandboxCommand,
         options: &SandboxExecuteOptions,
-    ) -> SandboxResult;
+    ) -> Result<SandboxResult, CoreError>;
     async fn destroy(&self);
 }

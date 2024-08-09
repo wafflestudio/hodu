@@ -68,44 +68,50 @@ pub async fn mark(params: MarkParams<'_>) -> MarkResult {
 
     sandbox.destroy().await;
 
-    MarkResult {
-        status: match &execute_result {
-            ExecutionResult::Success(result) => {
-                if result.stdout.trim().eq(params.expected_stdout.trim()) {
-                    MarkResultStatus::Correct
-                } else {
-                    MarkResultStatus::Wrong
+    match execute_result {
+        Result::Ok(result) => MarkResult {
+            status: match &result {
+                ExecutionResult::Success(result) => {
+                    if result.stdout.trim().eq(params.expected_stdout.trim()) {
+                        MarkResultStatus::Correct
+                    } else {
+                        MarkResultStatus::Wrong
+                    }
                 }
-            }
-            ExecutionResult::CompileError(_) => MarkResultStatus::CompileError,
-            ExecutionResult::RuntimeError(_) => MarkResultStatus::RuntimeError,
-            ExecutionResult::TimeLimitExceeded => MarkResultStatus::TimeLimitExceeded,
-            ExecutionResult::MemoryLimitExceeded => MarkResultStatus::MemoryLimitExceeded,
-            ExecutionResult::InternalError => MarkResultStatus::InternalError,
+                ExecutionResult::CompileError(_) => MarkResultStatus::CompileError,
+                ExecutionResult::RuntimeError(_) => MarkResultStatus::RuntimeError,
+                ExecutionResult::TimeLimitExceeded => MarkResultStatus::TimeLimitExceeded,
+                ExecutionResult::MemoryLimitExceeded => MarkResultStatus::MemoryLimitExceeded,
+            },
+            time: match &result {
+                ExecutionResult::Success(result) => result.time,
+                _ => 0.0,
+            },
+            memory: match &result {
+                ExecutionResult::Success(result) => result.memory,
+                _ => 0,
+            },
+            stdout: match &result {
+                ExecutionResult::Success(result) => result.stdout.clone(),
+                ExecutionResult::CompileError(result) => result.stdout.clone(),
+                ExecutionResult::RuntimeError(result) => result.stdout.clone(),
+                ExecutionResult::TimeLimitExceeded => String::new(),
+                ExecutionResult::MemoryLimitExceeded => String::new(),
+            },
+            stderr: match &result {
+                ExecutionResult::Success(result) => result.stderr.clone(),
+                ExecutionResult::CompileError(result) => result.stderr.clone(),
+                ExecutionResult::RuntimeError(result) => result.stderr.clone(),
+                ExecutionResult::TimeLimitExceeded => String::new(),
+                ExecutionResult::MemoryLimitExceeded => String::new(),
+            },
         },
-        time: match &execute_result {
-            ExecutionResult::Success(result) => result.time,
-            _ => 0.0,
-        },
-        memory: match &execute_result {
-            ExecutionResult::Success(result) => result.memory,
-            _ => 0,
-        },
-        stdout: match &execute_result {
-            ExecutionResult::Success(result) => result.stdout.clone(),
-            ExecutionResult::CompileError(result) => result.stdout.clone(),
-            ExecutionResult::RuntimeError(result) => result.stdout.clone(),
-            ExecutionResult::TimeLimitExceeded => String::new(),
-            ExecutionResult::MemoryLimitExceeded => String::new(),
-            ExecutionResult::InternalError => String::new(),
-        },
-        stderr: match &execute_result {
-            ExecutionResult::Success(result) => result.stderr.clone(),
-            ExecutionResult::CompileError(result) => result.stderr.clone(),
-            ExecutionResult::RuntimeError(result) => result.stderr.clone(),
-            ExecutionResult::TimeLimitExceeded => String::new(),
-            ExecutionResult::MemoryLimitExceeded => String::new(),
-            ExecutionResult::InternalError => String::new(),
+        Result::Err(message) => MarkResult {
+            status: MarkResultStatus::InternalError,
+            time: 0.0,
+            memory: 0,
+            stdout: String::new(),
+            stderr: message.to_string(),
         },
     }
 }
