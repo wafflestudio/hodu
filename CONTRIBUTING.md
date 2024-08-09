@@ -28,7 +28,7 @@ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 cargo run
 ```
 
-로컬에 isolate 가 설치되어 있다면 아래와 같이 Docker 를 활용할 수밖에 없습니다.
+로컬에 isolate 가 설치되어 있지 않다면 아래와 같이 Docker 를 활용할 수밖에 없습니다.
 로컬에서는 8081번 포트를 이용합니다.
 
 ```sh
