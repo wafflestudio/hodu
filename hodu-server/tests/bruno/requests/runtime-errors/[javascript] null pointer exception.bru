@@ -1,0 +1,28 @@
+meta {
+  name: [javascript] null pointer exception
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseURL}}/api/v1/submit
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "language": "javascript",
+    "code": "const a = null; console.log(a.a);",
+    "stdin": "",
+    "expected_stdout": "",
+    "fields": ["*"]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.fields.stdout: eq 
+  res.body.fields.stderr: neq
+  res.body.status: eq runtime_error
+}

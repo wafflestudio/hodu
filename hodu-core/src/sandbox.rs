@@ -9,8 +9,17 @@ pub struct SandboxResult {
     pub stdout: String,
     pub stderr: String,
     pub time: f64,
-    pub success: bool,
     pub memory: u32,
+    pub status: SandboxResultStatus,
+}
+
+#[derive(PartialEq)]
+pub enum SandboxResultStatus {
+    Success,
+    RuntimeError,
+    TimeLimitExceeded,
+    MemoryLimitExceeded,
+    InternalError,
 }
 
 pub struct SandboxSpecification {

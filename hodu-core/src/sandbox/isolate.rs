@@ -1,8 +1,11 @@
 use rand::Rng;
-use std::path::PathBuf;
+use std::{path::PathBuf, str::FromStr};
 use tokio::process::Command;
 
-use super::{Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResult, SandboxSpecification};
+use super::{
+    Sandbox, SandboxCommand, SandboxExecuteOptions, SandboxResult, SandboxResultStatus,
+    SandboxSpecification,
+};
 
 pub struct Isolate {
     box_id: i32,
@@ -16,6 +19,7 @@ impl Sandbox for Isolate {
         let box_id = rand::thread_rng().gen_range(0..1000);
         let init_output = Command::new("isolate")
             .arg(format!("--box-id={}", box_id))
+            .arg("--cg")
             .arg("--init")
             .output()
             .await
@@ -47,7 +51,7 @@ impl Sandbox for Isolate {
         command: &SandboxCommand<'_>,
         options: &SandboxExecuteOptions<'_>,
     ) -> SandboxResult {
-        let (output, time, memory) = match options {
+        let (output, time, memory, status) = match options {
             SandboxExecuteOptions::Sandboxed { stdin } => {
                 let home_dir = self.path.to_str().unwrap().trim();
 
@@ -55,10 +59,12 @@ impl Sandbox for Isolate {
                     .expect("Failed to write file");
 
                 let result = Command::new("isolate")
+                    .arg("--cg")
                     .arg(format!("--box-id={}", self.box_id))
                     .arg(format!("--processes={}", 128))
                     .arg(format!("--time={}", self.time_limit))
-                    .arg(format!("--mem={}", self.memory_limit))
+                    .arg(format!("--wall-time={}", 100))
+                    .arg(format!("--cg-mem={}", self.memory_limit))
                     .arg(format!("--meta={}/meta.txt", home_dir))
                     .arg("--stdin=stdin.txt")
                     .arg("--run")
@@ -71,39 +77,48 @@ impl Sandbox for Isolate {
                 let meta_content = std::fs::read_to_string(format!("{}/meta.txt", home_dir))
                     .expect("Failed to read file");
 
-                let time = meta_content
-                    .lines()
-                    .find(|line| line.starts_with("time-wall:"))
-                    .and_then(|line| line.split(':').nth(1))
-                    .map(|value| value.trim().parse::<f64>())
-                    .unwrap_or(Ok(0.0))
-                    .expect("Failed to parse time");
-
-                let memory = meta_content
-                    .lines()
-                    .find(|line| line.starts_with("max-rss:"))
-                    .and_then(|line| line.split(':').nth(1))
-                    .map(|value| value.trim().parse::<u32>())
-                    .unwrap_or(Ok(0))
-                    .expect("Failed to parse memory");
+                let meta_time: f64 = parse_meta_file(&meta_content, "time", 0.0);
+                let meta_cg_mem: u32 = parse_meta_file(&meta_content, "cg-mem", 0);
+                let meta_cg_oom_killed: u32 = parse_meta_file(&meta_content, "cg-oom-killed", 0);
+                let meta_status: String =
+                    parse_meta_file(&meta_content, "status", "OK".to_string());
 
                 std::fs::remove_file(format!("{}/stdin.txt", home_dir))
                     .expect("Failed to remove file");
                 std::fs::remove_file(format!("{}/meta.txt", home_dir))
                     .expect("Failed to remove file");
 
-                (result, time, memory)
+                let status = if meta_cg_oom_killed == 1 {
+                    SandboxResultStatus::MemoryLimitExceeded
+                } else if meta_status == "RE" {
+                    SandboxResultStatus::RuntimeError
+                } else if meta_status == "TO" {
+                    SandboxResultStatus::TimeLimitExceeded
+                } else if meta_status == "SG" || meta_status == "XX" {
+                    SandboxResultStatus::InternalError
+                } else if !result.status.success() {
+                    SandboxResultStatus::RuntimeError
+                } else {
+                    SandboxResultStatus::Success
+                };
+
+                (result, meta_time, meta_cg_mem, status)
             }
-            SandboxExecuteOptions::Unsandboxed => (
-                Command::new(command.binary)
+            SandboxExecuteOptions::Unsandboxed => {
+                let result = Command::new(command.binary)
                     .args(&command.args)
                     .current_dir(&self.path)
                     .output()
                     .await
-                    .expect("Failed to execute"),
-                0.0,
-                0,
-            ),
+                    .expect("Failed to execute");
+
+                let status = match &result.status.success() {
+                    true => SandboxResultStatus::Success,
+                    false => SandboxResultStatus::RuntimeError,
+                };
+
+                (result, 0.0, 0, status)
+            }
         };
 
         SandboxResult {
@@ -115,7 +130,7 @@ impl Sandbox for Isolate {
                 true => String::new(),
                 false => String::from_utf8(output.stderr.clone()).expect("Invalid output"),
             },
-            success: output.status.success(),
+            status,
             time,
             memory,
         }
@@ -123,10 +138,21 @@ impl Sandbox for Isolate {
 
     async fn destroy(&self) {
         Command::new("isolate")
+            .arg("--cg")
             .arg(format!("--box-id={}", self.box_id))
             .arg("--cleanup")
             .output()
             .await
             .expect("Failed to cleanup box");
     }
+}
+
+fn parse_meta_file<S: FromStr>(content: &str, key: &str, default: S) -> S {
+    content
+        .lines()
+        .find(|line| line.starts_with(key))
+        .and_then(|line| line.split(':').nth(1))
+        .map(|value| value.trim().parse::<S>().ok())
+        .flatten()
+        .unwrap_or(default)
 }
