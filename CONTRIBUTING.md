@@ -29,10 +29,11 @@ cargo run
 ```
 
 로컬에 isolate 가 설치되어 있다면 아래와 같이 Docker 를 활용할 수밖에 없습니다.
+로컬에서는 8081번 포트를 이용합니다.
 
 ```sh
 docker build -t hodu .
-docker run --privileged -dp 8080:8080 hodu
+docker run --privileged -dp 8081:8080 hodu
 ```
 
 ## Test
@@ -44,6 +45,15 @@ docker run --privileged -dp 8080:8080 hodu
 ```bash
 cd hodu-server/tests/bruno
 bru run --env local
+```
+
+## Deploy
+
+배포할 때는 8080번 포트를 이용합니다.
+
+```sh
+docker build -t hodu .
+docker run --privileged -dp 8080:8080 hodu
 ```
 
 <br/><br/>
