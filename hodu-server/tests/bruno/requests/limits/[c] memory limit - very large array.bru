@@ -1,7 +1,7 @@
 meta {
-  name: [c] no semicolon
+  name: [c] memory limit - very large array
   type: http
-  seq: 2
+  seq: 1
 }
 
 post {
@@ -13,7 +13,7 @@ post {
 body:json {
   {
     "language": "c",
-    "code": "#include <stdio.h>\nint main() { printf(\"Hello World\") }",
+    "code": "#include <stdlib.h>\nint main() { for (int i = 0; i < 100000000; i++) { int* p = (int *)malloc(sizeof(int)); } }",
     "stdin": "",
     "expected_stdout": "",
     "fields": ["*"]
@@ -22,7 +22,5 @@ body:json {
 
 assert {
   res.status: eq 200
-  res.body.fields.stdout: eq 
-  res.body.fields.stderr: neq
-  res.body.status: eq compile_error
+  res.body.status: eq memory_limit_exceeded
 }

@@ -1,7 +1,7 @@
 meta {
-  name: [c] memory limit - very large array
+  name: [c] time limit
   type: http
-  seq: 3
+  seq: 2
 }
 
 post {
@@ -13,14 +13,15 @@ post {
 body:json {
   {
     "language": "c",
-    "code": "#include <stdlib.h>\nint result[10000000][10000000];\nint main() { }",
+    "code": "#include <stdio.h>\nint main(){ int sum = 0; for (int i = 0; i < 1000000000; i++) sum += i; printf(\"%d\", sum); }",
     "stdin": "",
     "expected_stdout": "",
+    "time_limit": 1,
     "fields": ["*"]
   }
 }
 
 assert {
   res.status: eq 200
-  res.body.fields.stderr: eq Caught fatal signal 11\n
+  res.body.status: eq time_limit_exceeded
 }
