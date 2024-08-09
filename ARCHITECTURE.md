@@ -25,4 +25,5 @@
 ## CI/CD
 
 - CI는 Github Actions 를 사용합니다. [여기](./.github/workflows/ci.yml) 을 참고해 주세요.
+  - cgroup v1 만 활성화된 호스트에서 수행해야 하는데, 이제 모두 outdate되어서 GitHub Actions 가 기본으로 제공하지 않기 때문에 CI에는 Self Hosted Runner 를 사용합니다. 이때 hodu-dev 가 배포되어 있는 ec2를 이용합니다.
 - CD는 아직 구축되어 있지 않습니다.
