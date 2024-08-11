@@ -10,7 +10,7 @@ use super::{
 
 pub struct CppExecutor {}
 
-const DEFAULT_COMPILE_OPTIONS: [&str; 3] = ["-O2", "-static", "-std=gnu17"]; // 덮어씌울 수 있다.
+const DEFAULT_COMPILE_OPTIONS: [&str; 3] = ["-O2", "-static", "-std=gnu++17"]; // 덮어씌울 수 있다.
 const DEFAULT_COMPILE_ARGS: [&str; 3] = ["-o", "./main", "./main.cpp"]; // 덮어씌울 수 없다.
 
 impl LanguageExecutor for CppExecutor {
