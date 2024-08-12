@@ -94,11 +94,11 @@ impl Sandbox for Isolate {
 
                 let status = if meta_cg_oom_killed == 1 {
                     SandboxResultStatus::MemoryLimitExceeded
-                } else if meta_status == "RE" {
+                } else if meta_status == "RE" || meta_status == "SG" {
                     SandboxResultStatus::RuntimeError
                 } else if meta_status == "TO" {
                     SandboxResultStatus::TimeLimitExceeded
-                } else if meta_status == "SG" || meta_status == "XX" {
+                } else if meta_status == "XX" {
                     is_internal_error = true;
                     SandboxResultStatus::RuntimeError
                 } else if !result.status.success() {
