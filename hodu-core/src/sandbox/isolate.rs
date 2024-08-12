@@ -9,14 +9,14 @@ use super::{
     SandboxSpecification,
 };
 
-pub struct Isolate {
+pub struct IsolateSandbox {
     box_id: i32,
     path: PathBuf,
     memory_limit: u32,
     time_limit: f64,
 }
 
-impl Sandbox for Isolate {
+impl Sandbox for IsolateSandbox {
     async fn create(environment: SandboxSpecification) -> Self {
         let box_id = rand::thread_rng().gen_range(0..1000);
         let init_output = Command::new("isolate")
@@ -34,7 +34,7 @@ impl Sandbox for Isolate {
                 .trim()
         );
 
-        Isolate {
+        IsolateSandbox {
             box_id,
             path: PathBuf::from(working_directory),
             memory_limit: environment.memory_limit,
