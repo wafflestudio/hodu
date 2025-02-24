@@ -1,0 +1,3 @@
+[submodule "hodu-proto"]
+	path = hodu-proto
+	url = https://github.com/wafflestudio/hodu-proto.git
